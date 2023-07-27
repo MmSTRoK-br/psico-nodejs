@@ -217,7 +217,18 @@ app.put('/cadastro_clientes/:id', (req, res) => {
   });
 });
 
-
+// Buscar usuários pela instituição
+app.get('/usersByInstitution/:institution', (req, res) => {
+  const { institution } = req.params;
+  const query = 'SELECT * FROM cadastro_clientes WHERE institution = ?';
+  db.query(query, [institution], (err, results) => {
+    if (err) {
+      console.log(err);
+      return res.send({ success: false, message: err.message });
+    }
+    res.send({ success: true, users: results });
+  });
+});
 // Excluir um usuário
 app.delete('/users/:id', (req, res) => {
   const { id } = req.params;
