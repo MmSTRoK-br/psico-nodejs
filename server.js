@@ -139,11 +139,12 @@ const createTableQuery = `
   )
 `;
 
-db.query(createTableQuery, (error) => {
-  if (error) {
-    console.log(error);
-  }
-});
+try {
+  const [result] = await db.query(createTableQuery);
+  console.log(result);
+} catch (error) {
+  console.log(error);
+}
 
 app.post('/nova-instituicao', async (req, res) => {
 
