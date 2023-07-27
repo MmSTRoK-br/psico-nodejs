@@ -147,75 +147,79 @@ try {
 }
 
 app.post('/nova-instituicao', async (req, res) => {
-
   try {
+    const { 
+      instituicao, cnpj, inscricao_estadual, 
+      razao_social, logradouro, numero, complemento, 
+      bairro, cidade, estado, cep,
+      contatos, unidades, setores, cargos, usuarios 
+    } = req.body;
 
-  const { 
-    instituicao, cnpj, inscricao_estadual, 
-    razao_social, logradouro, numero, complemento, 
-    bairro, cidade, estado, cep,
-    unidades, setores, cargos, usuarios 
-  } = req.body;
-
-  // Salvar nova instituição
-  const insertNovaInstituicaoQuery = `
-    INSERT INTO Nova_Instituicao(instituicao, cnpj, inscricao_estadual, razao_social, logradouro, numero, complemento, bairro, cidade, estado, cep)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `;
-
-  const [result] = await db.query(insertNovaInstituicaoQuery, [
-    instituicao, cnpj, inscricao_estadual, razao_social, logradouro, 
-    numero, complemento, bairro, cidade, estado, cep
-  ]);
-
-  const instituicaoId = result.insertId;
-
-  // Salvar unidades
-  for(let i = 0; i < unidades.length; i++) {
-    const insertUnidadeQuery = `
-      INSERT INTO Unidades(instituicao_id, nome)
-      VALUES (?, ?)
+    const insertNovaInstituicaoQuery = `
+      INSERT INTO Nova_Instituicao(instituicao, cnpj, inscricao_estadual, razao_social, logradouro, numero, complemento, bairro, cidade, estado, cep)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
-    await db.query(insertUnidadeQuery, [instituicaoId, unidades[i]]);
-  }
 
-  // Salvar setores
-  for(let i = 0; i < setores.length; i++) {
-    const insertSetorQuery = `
-       INSERT INTO Setores(instituicao_id, nome)
-       VALUES (?, ?)
-    `;
-    await db.query(insertSetorQuery, [instituicaoId, setores[i]]);
-  }
+    const result = await db.promise().query(insertNovaInstituicaoQuery, [
+      instituicao, cnpj, inscricao_estadual, razao_social, logradouro, 
+      numero, complemento, bairro, cidade, estado, cep
+    ]);
 
-  // Salvar cargos
-  for(let i = 0; i < cargos.length; i++) {
-    const insertCargoQuery = `
-      INSERT INTO Cargos(instituicao_id, nome) 
-      VALUES (?, ?)
-    `;
-    await db.query(insertCargoQuery, [instituicaoId, cargos[i]]);
-  }
+    const instituicaoId = result[0].insertId;
 
-  // Salvar usuários
-  for(let i = 0; i < usuarios.length; i++) {
-    const { nome, identificador } = usuarios[i];
-    const insertUsuarioQuery = `
-       INSERT INTO Usuarios(instituicao_id, nome, identificador)
-       VALUES (?, ?, ?)
-    `;
-    await db.query(insertUsuarioQuery, [instituicaoId, nome, identificador]);
-  }
+    // Salvar contatos
+    for(let i = 0; i < contatos.length; i++) {
+      const { categoria, nomeCompleto, telefone } = contatos[i];
+      const insertContatoQuery = `
+        INSERT INTO Contatos(instituicao_id, categoria, nome_completo, telefone)
+        VALUES (?, ?, ?, ?)
+      `;
+      await db.promise().query(insertContatoQuery, [instituicaoId, categoria, nomeCompleto, telefone]);
+    }
 
-  res.send('Dados salvos com sucesso!');
+    // Salvar unidades
+    for(let i = 0; i < unidades.length; i++) {
+      const insertUnidadeQuery = `
+        INSERT INTO Unidades(instituicao_id, nome)
+        VALUES (?, ?)
+      `;
+      await db.promise().query(insertUnidadeQuery, [instituicaoId, unidades[i]]);
+    }
 
+    // Salvar setores
+    for(let i = 0; i < setores.length; i++) {
+      const insertSetorQuery = `
+         INSERT INTO Setores(instituicao_id, nome)
+         VALUES (?, ?)
+      `;
+      await db.promise().query(insertSetorQuery, [instituicaoId, setores[i]]);
+    }
+
+    // Salvar cargos
+    for(let i = 0; i < cargos.length; i++) {
+      const insertCargoQuery = `
+        INSERT INTO Cargos(instituicao_id, nome) 
+        VALUES (?, ?)
+      `;
+      await db.promise().query(insertCargoQuery, [instituicaoId, cargos[i]]);
+    }
+
+    // Salvar usuários
+    for(let i = 0; i < usuarios.length; i++) {
+      const { nome, identificador, status } = usuarios[i]; // adicionei status aqui, já que você mencionou que usuarios têm uma propriedade status
+      const insertUsuarioQuery = `
+         INSERT INTO Usuarios(instituicao_id, nome, identificador, status)
+         VALUES (?, ?, ?, ?)
+      `;
+      await db.promise().query(insertUsuarioQuery, [instituicaoId, nome, identificador, status]);
+    }
+
+    res.send('Dados salvos com sucesso!');
   } catch (error) {
     console.error(error);
     return res.status(500).send('Erro ao salvar os dados'); 
   }
-
 });
-
 
 
 // Buscar todos os usuários
