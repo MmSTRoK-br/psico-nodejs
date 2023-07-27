@@ -40,8 +40,6 @@ db.on('error', function(err) {
 });
 
 
-handleDisconnect();
-
 
 app.use(cors());
 
