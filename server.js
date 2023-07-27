@@ -9,41 +9,36 @@ const express = require('express');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-const mysql = require('mysql2');
+const mysql = require('mysql2/promise');
 const jwtSecret = 'suus02201998##';
 
 
 const app = express();
 
-var db;
+const db = mysql.createPool({
+  host: '129.148.55.118',
+  user: 'QualityAdmin',
+  password: 'Suus0220##',
+  database: 'your_database_name' // substitua 'your_database_name' pelo nome do seu banco de dados
+});
 
-function handleDisconnect() {
-  db = mysql.createPool({
-    host: '129.148.55.118',
-    user: 'QualityAdmin',
-    password: 'Suus0220##',
-    database: 'Psico-qslib',
-    connectionLimit: 10,
-  });
+db.getConnection(function(err, connection) {
+  if(err) {
+    console.log('error when connecting to db:', err);
+    setTimeout(handleDisconnect, 2000);
+  }
+  if (connection) connection.release();
+});
 
+db.on('error', function(err) {
+  console.log('db error', err);
+  if(err.code === 'PROTOCOL_CONNECTION_LOST') {
+    handleDisconnect();
+  } else {
+    throw err;
+  }
+});
 
-  db.getConnection(function(err, connection) {
-    if(err) {
-      console.log('error when connecting to db:', err);
-      setTimeout(handleDisconnect, 2000);
-    }
-    if (connection) connection.release();
-  });
-  
-  db.on('error', function(err) {
-    console.log('db error', err);
-    if(err.code === 'PROTOCOL_CONNECTION_LOST') {
-      handleDisconnect();
-    } else {
-      throw err;
-    }
-  });
-}
 
 handleDisconnect();
 
