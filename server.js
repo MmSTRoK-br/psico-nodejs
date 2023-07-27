@@ -9,7 +9,7 @@ const express = require('express');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-const mysql = require('mysql2');
+const mysql = require('mysql2/promise');
 const jwtSecret = 'suus02201998##';
 
 
@@ -48,7 +48,8 @@ function handleDisconnect() {
 handleDisconnect();
 
 
-app.use(cors());
+
+app.use(cors({ origin: 'http://localhost:3000' }));
 
 
 app.use(express.json());
