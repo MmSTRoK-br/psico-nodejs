@@ -43,6 +43,7 @@ async function handleDisconnect() {
       throw err;
     }
   });
+  createTables().catch(console.error);  // MODIFICADO: chamada da função createTables
 }
 
 handleDisconnect();
