@@ -144,24 +144,70 @@ db.query(createTableQuery, (error) => {
   }
 });
 
-app.post('/nova-instituicao', (req, res) => {
-  
-  const { instituicao, cnpj, inscricao_estadual, razao_social, logradouro, numero, complemento, bairro, cidade, estado, cep } = req.body;
+app.post('/nova-instituicao', async (req, res) => {
 
-  const insertQuery = `
-    INSERT INTO Nova_Instituicao (instituicao, cnpj, inscricao_estadual, razao_social, logradouro, numero, complemento, bairro, cidade, estado, cep)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)  
+  const { 
+    instituicao, cnpj, inscricao_estadual, 
+    razao_social, logradouro, numero, complemento, 
+    bairro, cidade, estado, cep,
+    unidades, setores, cargos, usuarios 
+  } = req.body;
+
+  // Salvar nova instituição
+  const insertNovaInstituicaoQuery = `
+    INSERT INTO Nova_Instituicao(instituicao, cnpj, inscricao_estadual, razao_social, logradouro, numero, complemento, bairro, cidade, estado, cep)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
-  db.query(insertQuery, [instituicao, cnpj, inscricao_estadual, razao_social, logradouro, numero, complemento, bairro, cidade, estado, cep], (error, results) => {
-    if (error) {
-      console.log(error);
-      return res.status(500).send('Error saving data');
-    }
-    return res.send('Data saved successfully');
-  });
+  const [result] = await db.query(insertNovaInstituicaoQuery, [
+    instituicao, cnpj, inscricao_estadual, razao_social, logradouro, 
+    numero, complemento, bairro, cidade, estado, cep
+  ]);
+
+  const instituicaoId = result.insertId;
+
+  // Salvar unidades
+  for(let i = 0; i < unidades.length; i++) {
+    const insertUnidadeQuery = `
+      INSERT INTO Unidades(instituicao_id, nome)
+      VALUES (?, ?)
+    `;
+    await db.query(insertUnidadeQuery, [instituicaoId, unidades[i]]);
+  }
+
+  // Salvar setores
+  for(let i = 0; i < setores.length; i++) {
+    const insertSetorQuery = `
+       INSERT INTO Setores(instituicao_id, nome)
+       VALUES (?, ?)
+    `;
+    await db.query(insertSetorQuery, [instituicaoId, setores[i]]);
+  }
+
+  // Salvar cargos
+  for(let i = 0; i < cargos.length; i++) {
+    const insertCargoQuery = `
+      INSERT INTO Cargos(instituicao_id, nome) 
+      VALUES (?, ?)
+    `;
+    await db.query(insertCargoQuery, [instituicaoId, cargos[i]]);
+  }
+
+  // Salvar usuários
+  for(let i = 0; i < usuarios.length; i++) {
+    const { nome, identificador } = usuarios[i];
+    const insertUsuarioQuery = `
+       INSERT INTO Usuarios(instituicao_id, nome, identificador)
+       VALUES (?, ?, ?)
+    `;
+    await db.query(insertUsuarioQuery, [instituicaoId, nome, identificador]);
+  }
+
+  res.send('Dados salvos com sucesso!');
 
 });
+
+
 
 // Buscar todos os usuários
 app.get('/users', (req, res) => {
