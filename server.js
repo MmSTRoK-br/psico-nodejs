@@ -218,7 +218,7 @@ app.put('/cadastro_clientes/:id', (req, res) => {
 });
 
 // Buscar usuários pela instituição
-app.get('/usersByInstitution/:institution', (req, res) => {
+app.get('/usersByInstitution/:instituicao', (req, res) => {
   const { institution } = req.params;
   const query = 'SELECT * FROM cadastro_clientes WHERE institution = ?';
   db.query(query, [institution], (err, results) => {
