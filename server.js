@@ -9,7 +9,8 @@ const express = require('express');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-const mysql = require('mysql2');
+const mysql = require('mysql2/promise');
+
 const jwtSecret = 'suus02201998##';
 
 
@@ -48,7 +49,8 @@ function handleDisconnect() {
 handleDisconnect();
 
 
-app.use(cors());
+app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
+
 
 
 app.use(express.json());
@@ -207,10 +209,10 @@ app.post('/nova-instituicao', async (req, res) => {
 
   res.send('Dados salvos com sucesso!');
 
-  } catch (error) {
-    console.error(error);
-    return res.status(500).send('Erro ao salvar os dados'); 
-  }
+} catch (error) {
+  console.error(error);
+  return res.status(500).send('Erro ao salvar os dados'); 
+}
 
 });
 
