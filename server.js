@@ -146,6 +146,8 @@ db.query(createTableQuery, (error) => {
 
 app.post('/nova-instituicao', async (req, res) => {
 
+  try {
+
   const { 
     instituicao, cnpj, inscricao_estadual, 
     razao_social, logradouro, numero, complemento, 
@@ -204,6 +206,11 @@ app.post('/nova-instituicao', async (req, res) => {
   }
 
   res.send('Dados salvos com sucesso!');
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).send('Erro ao salvar os dados'); 
+  }
 
 });
 
