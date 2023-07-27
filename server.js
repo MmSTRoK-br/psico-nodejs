@@ -4,7 +4,6 @@ console.log('DB User:', process.env.DB_USER);
 console.log('DB Password:', process.env.DB_PASSWORD);
 console.log('DB Name:', process.env.DB_NAME);
 
-
 const express = require('express');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
@@ -12,12 +11,11 @@ const bcrypt = require('bcrypt');
 const mysql = require('mysql2/promise');
 const jwtSecret = 'suus02201998##';
 
-
 const app = express();
 
 var db;
 
-async function handleDisconnect() {
+function handleDisconnect() {
   db = mysql.createPool({
     host: '129.148.55.118',
     user: 'QualityAdmin',
@@ -25,7 +23,6 @@ async function handleDisconnect() {
     database: 'Psico-qslib',
     connectionLimit: 10,
   });
-
 
   db.getConnection(function(err, connection) {
     if(err) {
@@ -43,16 +40,11 @@ async function handleDisconnect() {
       throw err;
     }
   });
-  createTables().catch(console.error);  // MODIFICADO: chamada da função createTables
 }
 
 handleDisconnect();
 
-
-
-app.use(cors({
-  origin: 'http://localhost:3000' 
-}));
+app.use(cors({ origin: 'http://localhost:3000' }));
 
 app.use(express.json());
 
@@ -122,33 +114,7 @@ app.post('/register', (req, res) => {
     }
     res.send({ success: true });
   });         
-
 });
-async function handleDisconnect() {
-const createTableQuery = `
-  CREATE TABLE IF NOT EXISTS Nova_Instituicao (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    instituicao VARCHAR(255) NOT NULL,
-    cnpj VARCHAR(18) NOT NULL, 
-    inscricao_estadual VARCHAR(20) NOT NULL,
-    razao_social VARCHAR(255) NOT NULL,
-    logradouro VARCHAR(255) NOT NULL,
-    numero VARCHAR(10) NOT NULL,
-    complemento VARCHAR(50),
-    bairro VARCHAR(100) NOT NULL,
-    cidade VARCHAR(100) NOT NULL,
-    estado VARCHAR(2) NOT NULL,
-    cep VARCHAR(10) NOT NULL
-  )
-`;
-
-try {
-  const [result] = await db.query(createTableQuery);
-  console.log(result);
-} catch (error) {
-  console.log(error);
-}
-}
 
 app.post('/nova-instituicao', async (req, res) => {
   try {
@@ -210,12 +176,12 @@ app.post('/nova-instituicao', async (req, res) => {
 
     // Salvar usuários
     for(let i = 0; i < usuarios.length; i++) {
-      const { nome, identificador, status } = usuarios[i]; // adicionei status aqui, já que você mencionou que usuarios têm uma propriedade status
+      const { nome, identificador } = usuarios[i];
       const insertUsuarioQuery = `
-         INSERT INTO Usuarios(instituicao_id, nome, identificador, status)
-         VALUES (?, ?, ?, ?)
+         INSERT INTO Usuarios(instituicao_id, nome, identificador)
+         VALUES (?, ?, ?)
       `;
-      await db.promise().query(insertUsuarioQuery, [instituicaoId, nome, identificador, status]);
+      await db.promise().query(insertUsuarioQuery, [instituicaoId, nome, identificador]);
     }
 
     res.send('Dados salvos com sucesso!');
@@ -225,102 +191,7 @@ app.post('/nova-instituicao', async (req, res) => {
   }
 });
 
-
-// Buscar todos os usuários
-app.get('/users', (req, res) => {
-  const query = 'SELECT * FROM cadastro_clientes';
-  db.query(query, (err, results) => {
-    if (err) {
-      console.log(err);
-      return res.send({ success: false, message: err.message });
-    }
-    res.send({ success: true, users: results });
-  });
-});
-
-// Contagem de todos os usuários
-app.get('/usercount', (req, res) => {
-  const query = 'SELECT COUNT(id) AS count FROM cadastro_clientes';
-  db.query(query, (err, results) => {
-    if (err) {
-      console.log(err);
-      return res.send({ success: false, message: err.message });
-    }
-    res.send({ success: true, count: results[0].count });
-  });
-});
-
-// Atualizar um usuário
-app.put('/cadastro_clientes/:id', (req, res) => {
-  const { id } = req.params;
-  const {
-    name,
-    surname,
-    email,
-    birthDate,
-    gender,
-    phone,
-    phone2,
-    cpf,
-    cnpj,
-    registration,
-    obs,
-    address,
-    number,
-    complement,
-    district,
-    city,
-    state,
-    country,
-    zipCode,
-    unit,
-    sector,
-    role,
-    institution,
-    accessRecovery,
-    access,  // Adicionado aqui
-  } = req.body;
-
-  const query =
-    'UPDATE cadastro_clientes SET name = ?, surname = ?, email = ?, birthDate = ?, gender = ?, phone = ?, phone2 = ?, cpf = ?, cnpj = ?, registration = ?, obs = ?, address = ?, number = ?, complement = ?, district = ?, city = ?, state = ?, country = ?, zipCode = ?, unit = ?, sector = ?, role = ?, institution = ?, accessRecovery = ?, access = ? WHERE id = ?';  // Adicionado aqui
-
-  const values = [
-    name,
-    surname,
-    email,
-    birthDate,
-    gender,
-    phone,
-    phone2,
-    cpf,
-    cnpj,
-    registration,
-    obs,
-    address,
-    number,
-    complement,
-    district,
-    city,
-    state,
-    country,
-    zipCode,
-    unit,
-    sector,
-    role,
-    institution,
-    accessRecovery,
-    access,  // Adicionado aqui
-    id,
-  ];
-
-  db.query(query, values, (err, result) => {
-    if (err) {
-      console.log(err);
-      return res.send({ success: false, message: err.message });
-    }
-    res.send({ success: true });
-  });
-});
+// Continue aqui com o resto do código do seu servidor
 
 
 // Excluir um usuário
