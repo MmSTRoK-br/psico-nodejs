@@ -9,7 +9,7 @@ const express = require('express');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-const mysql = require('mysql2');
+const mysql = require('mysql2/promise');
 const jwtSecret = 'suus02201998##';
 
 
@@ -19,7 +19,7 @@ const db = mysql.createPool({
   host: '129.148.55.118',
   user: 'QualityAdmin',
   password: 'Suus0220##',
-  database: 'your_database_name' // substitua 'your_database_name' pelo nome do seu banco de dados
+  database: 'Psico-qslib' // substitua 'your_database_name' pelo nome do seu banco de dados
 });
 
 db.getConnection(function(err, connection) {
