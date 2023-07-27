@@ -44,7 +44,8 @@ function handleDisconnect() {
 
 handleDisconnect();
 
-app.use(cors({ origin: 'http://localhost:3000' }));
+app.use(cors({ origin: ['http://localhost:3000', 'https://fair-ruby-caterpillar-wig.cyclic.app'] }));
+
 
 app.use(express.json());
 
@@ -117,6 +118,8 @@ app.post('/register', (req, res) => {
 });
 
 app.post('/nova-instituicao', async (req, res) => {
+  const connection = await db.getConnection();
+
   try {
     const { 
       instituicao, cnpj, inscricao_estadual, 
@@ -130,12 +133,12 @@ app.post('/nova-instituicao', async (req, res) => {
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
-    const result = await db.promise().query(insertNovaInstituicaoQuery, [
+    const [result] = await connection.promise().query(insertNovaInstituicaoQuery, [
       instituicao, cnpj, inscricao_estadual, razao_social, logradouro, 
       numero, complemento, bairro, cidade, estado, cep
     ]);
 
-    const instituicaoId = result[0].insertId;
+    const instituicaoId = result.insertId;
 
     // Salvar contatos
     for(let i = 0; i < contatos.length; i++) {
@@ -144,7 +147,7 @@ app.post('/nova-instituicao', async (req, res) => {
         INSERT INTO Contatos(instituicao_id, categoria, nome_completo, telefone)
         VALUES (?, ?, ?, ?)
       `;
-      await db.promise().query(insertContatoQuery, [instituicaoId, categoria, nomeCompleto, telefone]);
+      await connection.promise().query(insertContatoQuery, [instituicaoId, categoria, nomeCompleto, telefone]);
     }
 
     // Salvar unidades
@@ -153,7 +156,7 @@ app.post('/nova-instituicao', async (req, res) => {
         INSERT INTO Unidades(instituicao_id, nome)
         VALUES (?, ?)
       `;
-      await db.promise().query(insertUnidadeQuery, [instituicaoId, unidades[i]]);
+      await connection.promise().query(insertUnidadeQuery, [instituicaoId, unidades[i]]);
     }
 
     // Salvar setores
@@ -162,7 +165,7 @@ app.post('/nova-instituicao', async (req, res) => {
          INSERT INTO Setores(instituicao_id, nome)
          VALUES (?, ?)
       `;
-      await db.promise().query(insertSetorQuery, [instituicaoId, setores[i]]);
+      await connection.promise().query(insertSetorQuery, [instituicaoId, setores[i]]);
     }
 
     // Salvar cargos
@@ -171,7 +174,7 @@ app.post('/nova-instituicao', async (req, res) => {
         INSERT INTO Cargos(instituicao_id, nome) 
         VALUES (?, ?)
       `;
-      await db.promise().query(insertCargoQuery, [instituicaoId, cargos[i]]);
+      await connection.promise().query(insertCargoQuery, [instituicaoId, cargos[i]]);
     }
 
     // Salvar usuários
@@ -181,17 +184,18 @@ app.post('/nova-instituicao', async (req, res) => {
          INSERT INTO Usuarios(instituicao_id, nome, identificador)
          VALUES (?, ?, ?)
       `;
-      await db.promise().query(insertUsuarioQuery, [instituicaoId, nome, identificador]);
+      await connection.promise().query(insertUsuarioQuery, [instituicaoId, nome, identificador]);
     }
 
     res.send('Dados salvos com sucesso!');
   } catch (error) {
     console.error(error);
     return res.status(500).send('Erro ao salvar os dados'); 
+  } finally {
+    // Certifique-se de liberar a conexão quando terminar
+    connection.release();
   }
 });
-
-// Continue aqui com o resto do código do seu servidor
 
 
 // Excluir um usuário
