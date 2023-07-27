@@ -121,6 +121,48 @@ app.post('/register', (req, res) => {
   });         
 });
 
+const createTableQuery = `
+  CREATE TABLE IF NOT EXISTS Nova_Instituicao (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    instituicao VARCHAR(255) NOT NULL,
+    cnpj VARCHAR(18) NOT NULL, 
+    inscricao_estadual VARCHAR(20) NOT NULL,
+    razao_social VARCHAR(255) NOT NULL,
+    logradouro VARCHAR(255) NOT NULL,
+    numero VARCHAR(10) NOT NULL,
+    complemento VARCHAR(50),
+    bairro VARCHAR(100) NOT NULL,
+    cidade VARCHAR(100) NOT NULL,
+    estado VARCHAR(2) NOT NULL,
+    cep VARCHAR(10) NOT NULL
+  )
+`;
+
+db.query(createTableQuery, (error) => {
+  if (error) {
+    console.log(error);
+  }
+});
+
+app.post('/nova-instituicao', (req, res) => {
+  
+  const { instituicao, cnpj, inscricao_estadual, razao_social, logradouro, numero, complemento, bairro, cidade, estado, cep } = req.body;
+
+  const insertQuery = `
+    INSERT INTO Nova_Instituicao (instituicao, cnpj, inscricao_estadual, razao_social, logradouro, numero, complemento, bairro, cidade, estado, cep)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)  
+  `;
+
+  db.query(insertQuery, [instituicao, cnpj, inscricao_estadual, razao_social, logradouro, numero, complemento, bairro, cidade, estado, cep], (error, results) => {
+    if (error) {
+      console.log(error);
+      return res.status(500).send('Error saving data');
+    }
+    return res.send('Data saved successfully');
+  });
+
+});
+
 // Buscar todos os usuários
 app.get('/users', (req, res) => {
   const query = 'SELECT * FROM cadastro_clientes';
