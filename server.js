@@ -13,8 +13,6 @@ const jwtSecret = 'suus02201998##';
 
 const app = express();
 
-var db;
-
 const pool = mysql.createPool({
   host: '129.148.55.118',
   user: 'QualityAdmin',
@@ -23,10 +21,7 @@ const pool = mysql.createPool({
   connectionLimit: 10,
 });
 
-handleDisconnect();
-
 app.use(cors({ origin: ['http://localhost:3000', 'https://fair-ruby-caterpillar-wig.cyclic.app'] }));
-
 
 app.use(express.json());
 
