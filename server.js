@@ -15,32 +15,13 @@ const app = express();
 
 var db;
 
-function handleDisconnect() {
-  db = mysql.createPool({
-    host: '129.148.55.118',
-    user: 'QualityAdmin',
-    password: 'Suus0220##',
-    database: 'Psico-qslib',
-    connectionLimit: 10,
-  });
-
-  db.getConnection(function(err, connection) {
-    if(err) {
-      console.log('error when connecting to db:', err);
-      setTimeout(handleDisconnect, 2000);
-    }
-    if (connection) connection.release();
-  });
-  
-  db.on('error', function(err) {
-    console.log('db error', err);
-    if(err.code === 'PROTOCOL_CONNECTION_LOST') {
-      handleDisconnect();
-    } else {
-      throw err;
-    }
-  });
-}
+const pool = mysql.createPool({
+  host: '129.148.55.118',
+  user: 'QualityAdmin',
+  password: 'Suus0220##',
+  database: 'Psico-qslib',
+  connectionLimit: 10,
+});
 
 handleDisconnect();
 
@@ -118,9 +99,10 @@ app.post('/register', (req, res) => {
 });
 
 app.post('/nova-instituicao', async (req, res) => {
-  const connection = await db.getConnection();
-
+  let connection;
   try {
+    connection = await pool.getConnection();
+
     const { 
       instituicao, cnpj, inscricao_estadual, 
       razao_social, logradouro, numero, complemento, 
@@ -133,7 +115,7 @@ app.post('/nova-instituicao', async (req, res) => {
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
-    const [result] = await connection.promise().query(insertNovaInstituicaoQuery, [
+    const [result] = await connection.query(insertNovaInstituicaoQuery, [
       instituicao, cnpj, inscricao_estadual, razao_social, logradouro, 
       numero, complemento, bairro, cidade, estado, cep
     ]);
@@ -147,7 +129,7 @@ app.post('/nova-instituicao', async (req, res) => {
         INSERT INTO Contatos(instituicao_id, categoria, nome_completo, telefone)
         VALUES (?, ?, ?, ?)
       `;
-      await connection.promise().query(insertContatoQuery, [instituicaoId, categoria, nomeCompleto, telefone]);
+      await connection.query(insertContatoQuery, [instituicaoId, categoria, nomeCompleto, telefone]);
     }
 
     // Salvar unidades
@@ -156,7 +138,7 @@ app.post('/nova-instituicao', async (req, res) => {
         INSERT INTO Unidades(instituicao_id, nome)
         VALUES (?, ?)
       `;
-      await connection.promise().query(insertUnidadeQuery, [instituicaoId, unidades[i]]);
+      await connection.query(insertUnidadeQuery, [instituicaoId, unidades[i]]);
     }
 
     // Salvar setores
@@ -165,7 +147,7 @@ app.post('/nova-instituicao', async (req, res) => {
          INSERT INTO Setores(instituicao_id, nome)
          VALUES (?, ?)
       `;
-      await connection.promise().query(insertSetorQuery, [instituicaoId, setores[i]]);
+      await connection.query(insertSetorQuery, [instituicaoId, setores[i]]);
     }
 
     // Salvar cargos
@@ -174,7 +156,7 @@ app.post('/nova-instituicao', async (req, res) => {
         INSERT INTO Cargos(instituicao_id, nome) 
         VALUES (?, ?)
       `;
-      await connection.promise().query(insertCargoQuery, [instituicaoId, cargos[i]]);
+      await connection.query(insertCargoQuery, [instituicaoId, cargos[i]]);
     }
 
     // Salvar usuários
@@ -184,7 +166,7 @@ app.post('/nova-instituicao', async (req, res) => {
          INSERT INTO Usuarios(instituicao_id, nome, identificador)
          VALUES (?, ?, ?)
       `;
-      await connection.promise().query(insertUsuarioQuery, [instituicaoId, nome, identificador]);
+      await connection.query(insertUsuarioQuery, [instituicaoId, nome, identificador]);
     }
 
     res.send('Dados salvos com sucesso!');
@@ -192,11 +174,9 @@ app.post('/nova-instituicao', async (req, res) => {
     console.error(error);
     return res.status(500).send('Erro ao salvar os dados'); 
   } finally {
-    // Certifique-se de liberar a conexão quando terminar
-    connection.release();
+    if (connection) connection.release();
   }
 });
-
 
 // Excluir um usuário
 app.delete('/users/:id', (req, res) => {
