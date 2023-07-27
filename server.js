@@ -17,7 +17,7 @@ const app = express();
 
 var db;
 
-function handleDisconnect() {
+async function handleDisconnect() {
   db = mysql.createPool({
     host: '129.148.55.118',
     user: 'QualityAdmin',
@@ -121,8 +121,9 @@ app.post('/register', (req, res) => {
     }
     res.send({ success: true });
   });         
-});
 
+});
+async function handleDisconnect() {
 const createTableQuery = `
   CREATE TABLE IF NOT EXISTS Nova_Instituicao (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -145,6 +146,7 @@ try {
   console.log(result);
 } catch (error) {
   console.log(error);
+}
 }
 
 app.post('/nova-instituicao', async (req, res) => {
