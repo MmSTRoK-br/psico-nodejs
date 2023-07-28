@@ -21,6 +21,8 @@ const pool = mysql.createPool({
   connectionLimit: 10,
 });
 
+pool.connect();
+
 app.use(cors({ origin: ['http://localhost:3000', 'https://fair-ruby-caterpillar-wig.cyclic.app'] }));
 
 app.use(express.json());
