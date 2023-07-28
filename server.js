@@ -121,6 +121,13 @@ app.post('/nova-instituicao', async (req, res) => {
     estado = estado || '';
     cep = cep || '';
 
+    // Garante que os campos sejam sempre arrays, mesmo que estejam vazios
+    contatos = contatos || [];
+    unidades = unidades || [];
+    setores = setores || [];
+    cargos = cargos || [];
+    usuarios = usuarios || [];
+
     const insertNovaInstituicaoQuery = `
       INSERT INTO Nova_Instituicao(instituicao, cnpj, inscricao_estadual, razao_social, logradouro, numero, complemento, bairro, cidade, estado, cep)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
