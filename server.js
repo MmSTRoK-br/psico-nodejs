@@ -10,7 +10,8 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const mysql = require('mysql2/promise');
 const jwtSecret = 'suus02201998##';
-const CNPJ = require('cnpj');
+const CNPJValidator = require('cpf-cnpj-validator');
+
 
 const app = express();
 
@@ -97,7 +98,7 @@ app.post('/register', async (req, res) => {
   }         
 });
 
-const CNPJ = require('cnpj');
+
 const validator = require('validator');
 const { CPF } = require('cpf-cnpj-validator');
 
@@ -130,7 +131,7 @@ app.post('/nova-instituicao', async (req, res) => {
     if (!instituicao.trim()) {
       return res.status(400).send({ message: 'Nome da instituição é obrigatório.' });
     }
-    if (!CNPJ.isValid(cnpj)) {
+    if (!CNPJValidator.isValid(cnpj)) {
       return res.status(400).send({ message: 'CNPJ inválido.' });
     }
     if (!numero.trim() || isNaN(numero)) {
