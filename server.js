@@ -96,7 +96,6 @@ app.post('/register', async (req, res) => {
   }         
 });
 
-
 app.post('/nova-instituicao', async (req, res) => {
   let connection;
   try {
@@ -109,8 +108,18 @@ app.post('/nova-instituicao', async (req, res) => {
       contatos, unidades, setores, cargos, usuarios 
     } = req.body;
 
-    // Garante que o campo inscricao_estadual seja uma string vazia caso seja null ou undefined
+    // Garante que os campos sejam uma string vazia caso seja null ou undefined
+    instituicao = instituicao || '';
+    cnpj = cnpj || '';
     inscricao_estadual = inscricao_estadual || '';
+    razao_social = razao_social || '';
+    logradouro = logradouro || '';
+    numero = numero || '';
+    complemento = complemento || '';
+    bairro = bairro || '';
+    cidade = cidade || '';
+    estado = estado || '';
+    cep = cep || '';
 
     const insertNovaInstituicaoQuery = `
       INSERT INTO Nova_Instituicao(instituicao, cnpj, inscricao_estadual, razao_social, logradouro, numero, complemento, bairro, cidade, estado, cep)
@@ -179,6 +188,7 @@ app.post('/nova-instituicao', async (req, res) => {
     if (connection) connection.release();
   }
 });
+
 
 app.post('/login', async (req, res) => {
   const { usuario, senha } = req.body;
