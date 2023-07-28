@@ -97,6 +97,10 @@ app.post('/register', async (req, res) => {
   }         
 });
 
+const CNPJ = require('cnpj');
+const validator = require('validator');
+const { CPF } = require('cpf-cnpj-validator');
+
 app.post('/nova-instituicao', async (req, res) => {
   let connection;
   try {
@@ -136,13 +140,28 @@ app.post('/nova-instituicao', async (req, res) => {
       return res.status(400).send({ message: 'CEP inválido.' });
     }
     
-
     // Garante que os campos sejam sempre arrays, mesmo que estejam vazios
     contatos = Array.isArray(contatos) ? contatos : [];
     unidades = Array.isArray(unidades) ? unidades : [];
     setores = Array.isArray(setores) ? setores : [];
     cargos = Array.isArray(cargos) ? cargos : [];
     usuarios = Array.isArray(usuarios) ? usuarios : [];
+
+    // Validação adicional
+    for (let contato of contatos) {
+      if (!contato.categoria.trim()) {
+        return res.status(400).send({ message: 'Categoria é obrigatória.' });
+      }
+      if (!contato.telefone.trim()) {
+        return res.status(400).send({ message: 'Telefone é obrigatório.' });
+      }
+    }
+
+    for (let usuario of usuarios) {
+      if (!CPF.isValid(usuario.identificador) && !validator.isEmail(usuario.identificador)) {
+        return res.status(400).send({ message: 'Identificador inválido. Deve ser um CPF ou um email válido.' });
+      }
+    }
 
     const insertNovaInstituicaoQuery = `
       INSERT INTO Nova_Instituicao(instituicao, cnpj, inscricao_estadual, razao_social, logradouro, numero, complemento, bairro, cidade, estado, cep)
