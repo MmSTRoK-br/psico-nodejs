@@ -13,7 +13,7 @@ const jwtSecret = 'suus02201998##';
 
 const app = express();
 
-const db = mysql.createPool({
+const pool = mysql.createPool({
   host: '129.148.55.118',
   user: 'QualityAdmin',
   password: 'Suus0220##',
@@ -21,13 +21,11 @@ const db = mysql.createPool({
   connectionLimit: 10,
 });
 
-
-
 app.use(cors({ origin: ['http://localhost:3000', 'https://fair-ruby-caterpillar-wig.cyclic.app'] }));
 
 app.use(express.json());
 
-app.post('/register', (req, res) => {
+app.post('/register', async (req, res) => {
   const {
     name,
     surname,
@@ -86,14 +84,18 @@ app.post('/register', (req, res) => {
     access, 
   ];
 
-  db.query(query, values, (err, result) => {
-    if (err) {
-      console.log(err);
-      return res.send({ success: false, message: err.message });
-    }
+  try {
+    const connection = await pool.getConnection();
+    await connection.query(query, values);
     res.send({ success: true });
-  });         
+  } catch (err) {
+    console.log(err);
+    return res.send({ success: false, message: err.message });
+  } finally {
+    if (connection) connection.release();
+  }         
 });
+
 
 app.post('/nova-instituicao', async (req, res) => {
   let connection;
@@ -176,32 +178,35 @@ app.post('/nova-instituicao', async (req, res) => {
 });
 
 // Excluir um usuário
-app.delete('/users/:id', (req, res) => {
+app.delete('/users/:id', async (req, res) => {
   const { id } = req.params;
   const query = 'DELETE FROM cadastro_clientes WHERE id = ?';
-  db.query(query, [id], (err, result) => {
-    if (err) {
-      console.log(err);
-      return res.send({ success: false, message: err.message });
-    }
+  
+  try {
+    const connection = await pool.getConnection();
+    const [result] = await connection.query(query, [id]);
+    
     if (result.affectedRows === 0) {
       return res.send({ success: false, message: 'User not found' });
     }
     res.send({ success: true, message: `User with ID ${id} deleted` });
-  });
+  } catch (err) {
+    console.log(err);
+    return res.send({ success: false, message: err.message });
+  } finally {
+    if (connection) connection.release();
+  }
 });
 
-app.post('/login', (req, res) => {
+app.post('/login', async (req, res) => {
   const { usuario, senha } = req.body;
 
   const query = 'SELECT * FROM login_register WHERE usuario = ?';
 
-  db.query(query, [usuario], (err, results) => {
-    if (err) {
-      console.log('Erro na consulta do banco de dados:', err);
-      return res.status(500).json({ success: false, message: 'Database query error' });
-    }
-
+  try {
+    const connection = await pool.getConnection();
+    const [results] = await connection.query(query, [usuario]);
+    
     if (results.length === 0) {
       console.log('Nenhum usuário encontrado com o nome de usuário fornecido');
       return res.status(404).json({ success: false, message: 'User not found' });
@@ -225,7 +230,12 @@ app.post('/login', (req, res) => {
     console.log('Login bem sucedido, token gerado:', token);
     
     res.json({ success: true, username: user.usuario, role: user.acesso, token });
-  });
+  } catch (err) {
+    console.log('Erro na consulta do banco de dados:', err);
+    return res.status(500).json({ success: false, message: 'Database query error' });
+  } finally {
+    if (connection) connection.release();
+  }
 });
 
 
@@ -239,52 +249,59 @@ app.post('/register_usuario', async (req, res) => {
     const query = 'INSERT INTO login_register (usuario, nome, email, senha, unidade, setor, acesso) VALUES (?, ?, ?, ?, ?, ?, ?)';
     const values = [usuario, nome, email, senhaHash, unidade, setor, acesso];
 
-    db.query(query, values, (err, result) => {
-      if (err) {
-        console.log(err);
-        return res.send({ success: false, message: err.message });
-      }
-      res.send({ success: true });
-    });
+    const connection = await pool.getConnection();
+    const [result] = await connection.query(query, values);
+
+    res.send({ success: true });
   } catch (err) {
     console.log(err);
     return res.send({ success: false, message: err.message });
+  } finally {
+    if (connection) connection.release();
   }
 });
 
-
-app.delete('/deleteAllUsers', (req, res) => {
+app.delete('/deleteAllUsers', async (req, res) => {
   const query = 'DELETE FROM login_register';
-  db.query(query, (err, result) => {
-    if (err) {
-      console.log(err);
-      return res.send({ success: false, message: 'Falha ao excluir usuários: ' + err.message });
-    }
+  
+  try {
+    const connection = await pool.getConnection();
+    const [result] = await connection.query(query);
 
     if (result.affectedRows > 0) {
       res.send({ success: true, message: `${result.affectedRows} usuário(s) foram excluídos.` });
     } else {
       res.send({ success: false, message: 'Não há usuários para excluir.' });
     }
-  });
+  } catch (err) {
+    console.log(err);
+    return res.send({ success: false, message: 'Falha ao excluir usuários: ' + err.message });
+  } finally {
+    if (connection) connection.release();
+  }
 });
 
 
-app.delete('/deleteAll', (req, res) => {
+app.delete('/deleteAll', async (req, res) => {
   const query = 'DELETE FROM cadastro_clientes';
-  db.query(query, (err, result) => {
-    if (err) {
-      console.log(err);
-      return res.send({ success: false, message: 'Falha ao excluir registros: ' + err.message });
-    }
+
+  try {
+    const connection = await pool.getConnection();
+    const [result] = await connection.query(query);
 
     if (result.affectedRows > 0) {
       res.send({ success: true, message: `${result.affectedRows} registro(s) foram excluídos.` });
     } else {
       res.send({ success: false, message: 'Não há registros para excluir.' });
     }
-  });
+  } catch (err) {
+    console.log(err);
+    return res.send({ success: false, message: 'Falha ao excluir registros: ' + err.message });
+  } finally {
+    if (connection) connection.release();
+  }
 });
+
 
 app.use((req, res, next) => {
   // Se não há token na requisição, passe para a próxima rota
