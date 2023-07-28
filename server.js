@@ -10,6 +10,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const mysql = require('mysql2/promise');
 const jwtSecret = 'suus02201998##';
+const CNPJ = require('cnpj');
 
 const app = express();
 
@@ -120,6 +121,21 @@ app.post('/nova-instituicao', async (req, res) => {
     cidade = cidade || '';
     estado = estado || '';
     cep = cep || '';
+
+    // Add basic validation
+    if (!instituicao.trim()) {
+      return res.status(400).send({ message: 'Nome da instituição é obrigatório.' });
+    }
+    if (!CNPJ.isValid(cnpj)) {
+      return res.status(400).send({ message: 'CNPJ inválido.' });
+    }
+    if (!numero.trim() || isNaN(numero)) {
+      return res.status(400).send({ message: 'Número inválido.' });
+    }
+    if (!cep.trim() || cep.length !== 8 || isNaN(cep)) {
+      return res.status(400).send({ message: 'CEP inválido.' });
+    }
+    
 
     // Garante que os campos sejam sempre arrays, mesmo que estejam vazios
     contatos = Array.isArray(contatos) ? contatos : [];
