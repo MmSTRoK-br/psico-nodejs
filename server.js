@@ -13,7 +13,7 @@ const jwtSecret = 'suus02201998##';
 
 const app = express();
 
-const pool = mysql.createPool({
+const db = mysql.createPool({
   host: '129.148.55.118',
   user: 'QualityAdmin',
   password: 'Suus0220##',
