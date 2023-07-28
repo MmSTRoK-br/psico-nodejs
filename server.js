@@ -122,11 +122,11 @@ app.post('/nova-instituicao', async (req, res) => {
     cep = cep || '';
 
     // Garante que os campos sejam sempre arrays, mesmo que estejam vazios
-    contatos = contatos || [];
-    unidades = unidades || [];
-    setores = setores || [];
-    cargos = cargos || [];
-    usuarios = usuarios || [];
+    contatos = Array.isArray(contatos) ? contatos : [];
+    unidades = Array.isArray(unidades) ? unidades : [];
+    setores = Array.isArray(setores) ? setores : [];
+    cargos = Array.isArray(cargos) ? cargos : [];
+    usuarios = Array.isArray(usuarios) ? usuarios : [];
 
     const insertNovaInstituicaoQuery = `
       INSERT INTO Nova_Instituicao(instituicao, cnpj, inscricao_estadual, razao_social, logradouro, numero, complemento, bairro, cidade, estado, cep)
@@ -140,51 +140,68 @@ app.post('/nova-instituicao', async (req, res) => {
 
     const instituicaoId = result.insertId;
 
+    // Verifica se a tabela Contatos existe, se não, cria
+    const [tables] = await connection.query('SHOW TABLES LIKE "Contatos"');
+    if (tables.length === 0) {
+      await connection.query(`
+        CREATE TABLE Contatos (
+          id INT AUTO_INCREMENT PRIMARY KEY,
+          instituicao_id INT,
+          categoria VARCHAR(255),
+          nome_completo VARCHAR(255),
+          telefone VARCHAR(255)
+        )
+      `);
+    }
+
     // Salvar contatos
-    for(let i = 0; i < contatos.length; i++) {
-      const { categoria, nomeCompleto, telefone } = contatos[i];
+    for(let contato of contatos) {
+      contato = { categoria: '', nomeCompleto: '', telefone: '', ...contato }; // Garante que os campos necessários existam
       const insertContatoQuery = `
         INSERT INTO Contatos(instituicao_id, categoria, nome_completo, telefone)
         VALUES (?, ?, ?, ?)
       `;
-      await connection.query(insertContatoQuery, [instituicaoId, categoria, nomeCompleto, telefone]);
+      await connection.query(insertContatoQuery, [instituicaoId, contato.categoria, contato.nomeCompleto, contato.telefone]);
     }
 
     // Salvar unidades
-    for(let i = 0; i < unidades.length; i++) {
+    for(let unidade of unidades) {
+      unidade = unidade || ''; // Garante que unidade exista
       const insertUnidadeQuery = `
         INSERT INTO Unidades(instituicao_id, nome)
         VALUES (?, ?)
       `;
-      await connection.query(insertUnidadeQuery, [instituicaoId, unidades[i]]);
+      await connection.query(insertUnidadeQuery, [instituicaoId, unidade]);
     }
 
     // Salvar setores
-    for(let i = 0; i < setores.length; i++) {
+    for(let setor of setores) {
+      setor = setor || ''; // Garante que setor exista
       const insertSetorQuery = `
-         INSERT INTO Setores(instituicao_id, nome)
-         VALUES (?, ?)
+        INSERT INTO Setores(instituicao_id, nome)
+        VALUES (?, ?)
       `;
-      await connection.query(insertSetorQuery, [instituicaoId, setores[i]]);
+      await connection.query(insertSetorQuery, [instituicaoId, setor]);
     }
 
     // Salvar cargos
-    for(let i = 0; i < cargos.length; i++) {
+    for(let cargo of cargos) {
+      cargo = cargo || ''; // Garante que cargo exista
       const insertCargoQuery = `
         INSERT INTO Cargos(instituicao_id, nome) 
         VALUES (?, ?)
       `;
-      await connection.query(insertCargoQuery, [instituicaoId, cargos[i]]);
+      await connection.query(insertCargoQuery, [instituicaoId, cargo]);
     }
 
     // Salvar usuários
-    for(let i = 0; i < usuarios.length; i++) {
-      const { nome, identificador } = usuarios[i];
+    for(let usuario of usuarios) {
+      usuario = { nome: '', identificador: '', ...usuario }; // Garante que os campos necessários existam
       const insertUsuarioQuery = `
-         INSERT INTO Usuarios(instituicao_id, nome, identificador)
-         VALUES (?, ?, ?)
+        INSERT INTO Usuarios(instituicao_id, nome, identificador)
+        VALUES (?, ?, ?)
       `;
-      await connection.query(insertUsuarioQuery, [instituicaoId, nome, identificador]);
+      await connection.query(insertUsuarioQuery, [instituicaoId, usuario.nome, usuario.identificador]);
     }
 
     res.send('Dados salvos com sucesso!');
