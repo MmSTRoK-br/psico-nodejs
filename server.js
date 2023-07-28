@@ -102,12 +102,15 @@ app.post('/nova-instituicao', async (req, res) => {
   try {
     connection = await pool.getConnection();
 
-    const { 
+    let { 
       instituicao, cnpj, inscricao_estadual, 
       razao_social, logradouro, numero, complemento, 
       bairro, cidade, estado, cep,
       contatos, unidades, setores, cargos, usuarios 
     } = req.body;
+
+    // Garante que o campo inscricao_estadual seja uma string vazia caso seja null ou undefined
+    inscricao_estadual = inscricao_estadual || '';
 
     const insertNovaInstituicaoQuery = `
       INSERT INTO Nova_Instituicao(instituicao, cnpj, inscricao_estadual, razao_social, logradouro, numero, complemento, bairro, cidade, estado, cep)
@@ -172,27 +175,6 @@ app.post('/nova-instituicao', async (req, res) => {
   } catch (error) {
     console.error(error);
     return res.status(500).send('Erro ao salvar os dados'); 
-  } finally {
-    if (connection) connection.release();
-  }
-});
-
-// Excluir um usuário
-app.delete('/users/:id', async (req, res) => {
-  const { id } = req.params;
-  const query = 'DELETE FROM cadastro_clientes WHERE id = ?';
-  
-  try {
-    const connection = await pool.getConnection();
-    const [result] = await connection.query(query, [id]);
-    
-    if (result.affectedRows === 0) {
-      return res.send({ success: false, message: 'User not found' });
-    }
-    res.send({ success: true, message: `User with ID ${id} deleted` });
-  } catch (err) {
-    console.log(err);
-    return res.send({ success: false, message: err.message });
   } finally {
     if (connection) connection.release();
   }
