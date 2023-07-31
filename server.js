@@ -131,7 +131,7 @@ app.post('/nova-instituicao', async (req, res) => {
     if (!instituicao.trim()) {
       return res.status(400).send({ message: 'Nome da instituição é obrigatório.' });
     }
-    if (!CNPJValidator.isValid(cnpj)) {
+    if (!isValidCNPJ(cnpj)) {
       return res.status(400).send({ message: 'CNPJ inválido.' });
     }
     if (!numero.trim() || isNaN(numero)) {
