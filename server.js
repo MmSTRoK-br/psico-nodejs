@@ -10,7 +10,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const mysql = require('mysql2/promise');
 const jwtSecret = 'suus02201998##';
-const CNPJValidator = require('cpf-cnpj-validator');
+const { CNPJ } = require('cpf-cnpj-validator'); // Importar CNPJ da biblioteca cpf-cnpj-validator
 
 
 const app = express();
@@ -100,7 +100,7 @@ app.post('/register', async (req, res) => {
 
 
 const validator = require('validator');
-const { CPF } = require('cpf-cnpj-validator');
+
 
 app.post('/nova-instituicao', async (req, res) => {
   let connection;
@@ -131,9 +131,10 @@ app.post('/nova-instituicao', async (req, res) => {
     if (!instituicao.trim()) {
       return res.status(400).send({ message: 'Nome da instituição é obrigatório.' });
     }
-    if (!isValidCNPJ(cnpj)) {
+    if (!CNPJ.isValid(cnpj)) {
       return res.status(400).send({ message: 'CNPJ inválido.' });
     }
+    
     if (!numero.trim() || isNaN(numero)) {
       return res.status(400).send({ message: 'Número inválido.' });
     }
