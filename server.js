@@ -10,7 +10,8 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const mysql = require('mysql2/promise');
 const jwtSecret = 'suus02201998##';
-const { CNPJ } = require('cpf-cnpj-validator'); // Importar CNPJ da biblioteca cpf-cnpj-validator
+const { CNPJ, CPF } = require('cpf-cnpj-validator');
+
 
 
 const app = express();
