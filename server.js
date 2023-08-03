@@ -160,7 +160,8 @@ app.post('/nova-instituicao', async (req, res) => {
     }
 
     for (let usuario of usuarios) {
-      if (!CPF.isValid(usuario.identificador) && !validator.isEmail(usuario.identificador)) {
+      usuario = { nome: '', identificador: '', ...usuario }; // Garante que os campos necessários existam
+      if (!usuario.identificador || (!CPF.isValid(usuario.identificador) && !validator.isEmail(usuario.identificador))) {
         return res.status(400).send({ message: 'Identificador inválido. Deve ser um CPF ou um email válido.' });
       }
     }
