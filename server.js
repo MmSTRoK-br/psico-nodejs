@@ -134,7 +134,6 @@ app.post('/nova-instituicao', async (req, res) => {
     if (!CNPJ.isValid(cnpj)) {
       return res.status(400).send({ message: 'CNPJ inválido.' });
     }
-    
     if (!numero.trim() || isNaN(numero)) {
       return res.status(400).send({ message: 'Número inválido.' });
     }
