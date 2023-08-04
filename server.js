@@ -103,161 +103,54 @@ const validator = require('validator');
 
 
 app.post('/nova-instituicao', async (req, res) => {
+  const {
+    instituicao,
+    cnpj,
+    inscricao_estadual,
+    razao_social,
+    logradouro,
+    numero,
+    complemento,
+    bairro,
+    cidade,
+    estado,
+    cep,
+    contatos,
+    unidades,
+    setores,
+    cargos,
+    usuarios,
+  } = req.body;
 
-  const { cpfNumber, cnpjNumber } = req.body;
-
-    if (!cpf.isValid(cpfNumber)) {
-        return res.status(400).send({ message: 'CPF inválido.' });
-    }
-
-    if (!cnpj.isValid(cnpjNumber)) {
-        return res.status(400).send({ message: 'CNPJ inválido.' });
-    }
-
-  let connection;
   try {
-    connection = await pool.getConnection();
+    // Inserir a instituição
+    const novaInstituicao = await Instituicao.create({
+      instituicao,
+      cnpj,
+      inscricao_estadual,
+      razao_social,
+      logradouro,
+      numero,
+      complemento,
+      bairro,
+      cidade,
+      estado,
+      cep,
+    });
 
-    let { 
-      instituicao, cnpj, inscricao_estadual, 
-      razao_social, logradouro, numero, complemento, 
-      bairro, cidade, estado, cep,
-      contatos, unidades, setores, cargos, usuarios 
-    } = req.body;
-
-    // Garante que os campos sejam uma string vazia caso seja null ou undefined
-    instituicao = instituicao || '';
-    cnpj = cnpj || '';
-    inscricao_estadual = inscricao_estadual || '';
-    razao_social = razao_social || '';
-    logradouro = logradouro || '';
-    numero = numero || '';
-    complemento = complemento || '';
-    bairro = bairro || '';
-    cidade = cidade || '';
-    estado = estado || '';
-    cep = cep || '';
-
-    // Add basic validation
-    if (!instituicao.trim()) {
-      return res.status(400).send({ message: 'Nome da instituição é obrigatório.' });
-    }
-    if (!CNPJ.isValid(cnpj)) {
-      return res.status(400).send({ message: 'CNPJ inválido.' });
-    }
-    if (!numero.trim() || isNaN(numero)) {
-      return res.status(400).send({ message: 'Número inválido.' });
-    }
-    if (!cep.trim() || cep.length !== 8 || isNaN(cep)) {
-      return res.status(400).send({ message: 'CEP inválido.' });
-    }
-    
-    // Garante que os campos sejam sempre arrays, mesmo que estejam vazios
-    contatos = Array.isArray(contatos) ? contatos : [];
-    unidades = Array.isArray(unidades) ? unidades : [];
-    setores = Array.isArray(setores) ? setores : [];
-    cargos = Array.isArray(cargos) ? cargos : [];
-    usuarios = Array.isArray(usuarios) ? usuarios : [];
-
-    // Validação adicional
-    for (let contato of contatos) {
-      if (!contato.categoria.trim()) {
-        return res.status(400).send({ message: 'Categoria é obrigatória.' });
-      }
-      if (!contato.telefone.trim()) {
-        return res.status(400).send({ message: 'Telefone é obrigatório.' });
-      }
-    }
-
-    for (let usuario of usuarios) {
-      usuario = { nome: '', identificador: '', ...usuario }; // Garante que os campos necessários existam
-      if (!usuario.identificador || (!CPF.isValid(usuario.identificador) && !validator.isEmail(usuario.identificador))) {
-        return res.status(400).send({ message: 'Identificador inválido. Deve ser um CPF ou um email válido.' });
-      }
-    }
-
-    const insertNovaInstituicaoQuery = `
-      INSERT INTO Nova_Instituicao(instituicao, cnpj, inscricao_estadual, razao_social, logradouro, numero, complemento, bairro, cidade, estado, cep)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `;
-
-    const [result] = await connection.query(insertNovaInstituicaoQuery, [
-      instituicao, cnpj, inscricao_estadual, razao_social, logradouro, 
-      numero, complemento, bairro, cidade, estado, cep
+    // Inserir os contatos, unidades, setores, cargos e usuários relacionados
+    await Promise.all([
+      Contato.bulkCreate(contatos.map(c => ({ ...c, instituicao_id: novaInstituicao.id }))),
+      Unidade.bulkCreate(unidades.map(u => ({ ...u, instituicao_id: novaInstituicao.id }))),
+      Setor.bulkCreate(setores.map(s => ({ ...s, instituicao_id: novaInstituicao.id }))),
+      Cargo.bulkCreate(cargos.map(c => ({ ...c, instituicao_id: novaInstituicao.id }))),
+      Usuario.bulkCreate(usuarios.map(u => ({ ...u, instituicao_id: novaInstituicao.id }))),
     ]);
 
-    const instituicaoId = result.insertId;
-
-    // Verifica se a tabela Contatos existe, se não, cria
-    const [tables] = await connection.query('SHOW TABLES LIKE "Contatos"');
-    if (tables.length === 0) {
-      await connection.query(`
-        CREATE TABLE Contatos (
-          id INT AUTO_INCREMENT PRIMARY KEY,
-          instituicao_id INT,
-          categoria VARCHAR(255),
-          nome_completo VARCHAR(255),
-          telefone VARCHAR(255)
-        )
-      `);
-    }
-
-    // Salvar contatos
-    for(let contato of contatos) {
-      contato = { categoria: '', nomeCompleto: '', telefone: '', ...contato }; // Garante que os campos necessários existam
-      const insertContatoQuery = `
-        INSERT INTO Contatos(instituicao_id, categoria, nome_completo, telefone)
-        VALUES (?, ?, ?, ?)
-      `;
-      await connection.query(insertContatoQuery, [instituicaoId, contato.categoria, contato.nomeCompleto, contato.telefone]);
-    }
-
-    // Salvar unidades
-    for(let unidade of unidades) {
-      unidade = unidade || ''; // Garante que unidade exista
-      const insertUnidadeQuery = `
-        INSERT INTO Unidades(instituicao_id, nome)
-        VALUES (?, ?)
-      `;
-      await connection.query(insertUnidadeQuery, [instituicaoId, unidade]);
-    }
-
-    // Salvar setores
-    for(let setor of setores) {
-      setor = setor || ''; // Garante que setor exista
-      const insertSetorQuery = `
-        INSERT INTO Setores(instituicao_id, nome)
-        VALUES (?, ?)
-      `;
-      await connection.query(insertSetorQuery, [instituicaoId, setor]);
-    }
-
-    // Salvar cargos
-    for(let cargo of cargos) {
-      cargo = cargo || ''; // Garante que cargo exista
-      const insertCargoQuery = `
-        INSERT INTO Cargos(instituicao_id, nome) 
-        VALUES (?, ?)
-      `;
-      await connection.query(insertCargoQuery, [instituicaoId, cargo]);
-    }
-
-    // Salvar usuários
-    for(let usuario of usuarios) {
-      usuario = { nome: '', identificador: '', ...usuario }; // Garante que os campos necessários existam
-      const insertUsuarioQuery = `
-        INSERT INTO Usuarios(instituicao_id, nome, identificador)
-        VALUES (?, ?, ?)
-      `;
-      await connection.query(insertUsuarioQuery, [instituicaoId, usuario.nome, usuario.identificador]);
-    }
-
-    res.send('Dados salvos com sucesso!');
+    res.status(200).send({ success: true });
   } catch (error) {
     console.error(error);
-    return res.status(500).send('Erro ao salvar os dados'); 
-  } finally {
-    if (connection) connection.release();
+    res.status(400).send({ success: false, message: 'Erro ao criar instituição.' });
   }
 });
 
