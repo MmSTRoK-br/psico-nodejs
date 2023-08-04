@@ -103,6 +103,7 @@ const validator = require('validator');
 
 
 app.post('/nova-instituicao', async (req, res) => {
+  // Extrai os dados do corpo da requisição
   const {
     instituicao,
     cnpj,
@@ -123,7 +124,7 @@ app.post('/nova-instituicao', async (req, res) => {
   } = req.body;
 
   try {
-    // Inserir a instituição
+    // Insere a nova instituição no banco de dados
     const novaInstituicao = await Instituicao.create({
       instituicao,
       cnpj,
@@ -138,7 +139,7 @@ app.post('/nova-instituicao', async (req, res) => {
       cep,
     });
 
-    // Inserir os contatos, unidades, setores, cargos e usuários relacionados
+    // Insere os contatos, unidades, setores, cargos e usuários relacionados no banco de dados
     await Promise.all([
       Contato.bulkCreate(contatos.map(c => ({ ...c, instituicao_id: novaInstituicao.id }))),
       Unidade.bulkCreate(unidades.map(u => ({ ...u, instituicao_id: novaInstituicao.id }))),
@@ -147,8 +148,10 @@ app.post('/nova-instituicao', async (req, res) => {
       Usuario.bulkCreate(usuarios.map(u => ({ ...u, instituicao_id: novaInstituicao.id }))),
     ]);
 
+    // Se todas as operações do banco de dados forem bem-sucedidas, envia uma resposta de sucesso
     res.status(200).send({ success: true });
   } catch (error) {
+    // Se houver algum erro durante as operações do banco de dados, envia uma resposta de erro
     console.error(error);
     res.status(400).send({ success: false, message: 'Erro ao criar instituição.' });
   }
