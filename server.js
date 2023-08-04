@@ -10,8 +10,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const mysql = require('mysql2/promise');
 const jwtSecret = 'suus02201998##';
-const { CNPJ, CPF } = require('cpf-cnpj-validator');
-
+const { cpf, cnpj } = require('cpf-cnpj-validator');
 
 
 const app = express();
@@ -104,6 +103,17 @@ const validator = require('validator');
 
 
 app.post('/nova-instituicao', async (req, res) => {
+
+  const { cpfNumber, cnpjNumber } = req.body;
+
+    if (!cpf.isValid(cpfNumber)) {
+        return res.status(400).send({ message: 'CPF inválido.' });
+    }
+
+    if (!cnpj.isValid(cnpjNumber)) {
+        return res.status(400).send({ message: 'CNPJ inválido.' });
+    }
+
   let connection;
   try {
     connection = await pool.getConnection();
