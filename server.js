@@ -10,7 +10,6 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const mysql = require('mysql2/promise');
 const jwtSecret = 'suus02201998##';
-const { cpf, cnpj } = require('cpf-cnpj-validator');
 
 
 const app = express();
@@ -99,65 +98,6 @@ app.post('/register', async (req, res) => {
 });
 
 
-const validator = require('validator');
-
-
-app.post('/nova-instituicao', async (req, res) => {
-  // Extrai os dados do corpo da requisição
-  const {
-    instituicao,
-    cnpj,
-    inscricao_estadual,
-    razao_social,
-    logradouro,
-    numero,
-    complemento,
-    bairro,
-    cidade,
-    estado,
-    cep,
-    contatos,
-    unidades,
-    setores,
-    cargos,
-    usuarios,
-  } = req.body;
-
-  try {
-    // Insere a nova instituição no banco de dados
-    const novaInstituicao = await Instituicao.create({
-      instituicao,
-      cnpj,
-      inscricao_estadual,
-      razao_social,
-      logradouro,
-      numero,
-      complemento,
-      bairro,
-      cidade,
-      estado,
-      cep,
-    });
-
-    // Insere os contatos, unidades, setores, cargos e usuários relacionados no banco de dados
-    await Promise.all([
-      Contato.bulkCreate(contatos.map(c => ({ ...c, instituicao_id: novaInstituicao.id }))),
-      Unidade.bulkCreate(unidades.map(u => ({ ...u, instituicao_id: novaInstituicao.id }))),
-      Setor.bulkCreate(setores.map(s => ({ ...s, instituicao_id: novaInstituicao.id }))),
-      Cargo.bulkCreate(cargos.map(c => ({ ...c, instituicao_id: novaInstituicao.id }))),
-      Usuario.bulkCreate(usuarios.map(u => ({ ...u, instituicao_id: novaInstituicao.id }))),
-    ]);
-
-    // Se todas as operações do banco de dados forem bem-sucedidas, envia uma resposta de sucesso
-    res.status(200).send({ success: true });
-  } catch (error) {
-    // Se houver algum erro durante as operações do banco de dados, envia uma resposta de erro
-    console.error(error);
-    res.status(400).send({ success: false, message: 'Erro ao criar instituição.' });
-  }
-});
-
-
 app.post('/login', async (req, res) => {
   const { usuario, senha } = req.body;
 
@@ -197,6 +137,77 @@ app.post('/login', async (req, res) => {
     if (connection) connection.release();
   }
 });
+
+app.post('/instituicoes', (req, res) => {
+  const {
+      nome, cnpj, telefone, email, site, 
+      cep, logradouro, numero, complemento, bairro, cidade, estado,
+      contatos, unidades, setores, cargos, usuarios
+  } = req.body;
+
+  pool.query('INSERT INTO Instituicoes (nome, cnpj, telefone, email, site, cep, logradouro, numero, complemento, bairro, cidade, estado) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', 
+  [nome, cnpj, telefone, email, site, cep, logradouro, numero, complemento, bairro, cidade, estado], 
+  (error, results) => {
+      if (error) {
+          return res.status(500).json({ error });
+      }
+
+      const instituicaoId = results.insertId;
+
+      contatos.forEach(contact => {
+          pool.query('INSERT INTO Contatos (instituicaoId, categoria, nomeCompleto, telefone, email) VALUES (?, ?, ?, ?, ?)',
+          [instituicaoId, contact.categoria, contact.nomeCompleto, contact.telefone, contact.email],
+          (error) => {
+              if (error) {
+                  console.error("Erro ao inserir contato:", error);
+              }
+          });
+      });
+
+      unidades.forEach(unidade => {
+          pool.query('INSERT INTO Unidades (instituicaoId, nome, descricao) VALUES (?, ?, ?)',
+          [instituicaoId, unidade.nome, unidade.descricao],
+          (error) => {
+              if (error) {
+                  console.error("Erro ao inserir unidade:", error);
+              }
+          });
+      });
+
+      setores.forEach(setor => {
+          pool.query('INSERT INTO Setores (instituicaoId, nome, descricao) VALUES (?, ?, ?)',
+          [instituicaoId, setor.nome, setor.descricao],
+          (error) => {
+              if (error) {
+                  console.error("Erro ao inserir setor:", error);
+              }
+          });
+      });
+
+      cargos.forEach(cargo => {
+          pool.query('INSERT INTO Cargos (instituicaoId, nome, descricao) VALUES (?, ?, ?)',
+          [instituicaoId, cargo.nome, cargo.descricao],
+          (error) => {
+              if (error) {
+                  console.error("Erro ao inserir cargo:", error);
+              }
+          });
+      });
+
+      usuarios.forEach(usuario => {
+          pool.query('INSERT INTO Usuarios (instituicaoId, nome, email, senha) VALUES (?, ?, ?, ?)',
+          [instituicaoId, usuario.nome, usuario.email, usuario.senha],
+          (error) => {
+              if (error) {
+                  console.error("Erro ao inserir usuário:", error);
+              }
+          });
+      });
+
+      res.status(200).json({ message: 'Instituição e informações associadas salvas com sucesso!' });
+  });
+});
+
 
 
 app.post('/register_usuario', async (req, res) => {
