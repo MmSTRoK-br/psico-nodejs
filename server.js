@@ -139,6 +139,7 @@ app.post('/login', async (req, res) => {
 });
 
 app.post('/instituicoes', (req, res) => {
+  console.log("Dados recebidos:", req.body);
   const {
       nome, cnpj, telefone, email, site, 
       cep, logradouro, numero, complemento, bairro, cidade, estado,
