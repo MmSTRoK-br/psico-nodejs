@@ -139,75 +139,86 @@ app.post('/login', async (req, res) => {
 });
 
 app.post('/instituicoes', (req, res) => {
-  console.log("Dados recebidos:", req.body);
   const {
-      nome, cnpj, telefone, email, site, 
-      cep, logradouro, numero, complemento, bairro, cidade, estado,
+      nome, cnpj, inscricaoEstadual, razaoSocial, logradouro, numero, complemento, bairro, cidade, estado, pais, cep,
       contatos, unidades, setores, cargos, usuarios
   } = req.body;
 
-  pool.query('INSERT INTO Instituicoes (nome, cnpj, telefone, email, site, cep, logradouro, numero, complemento, bairro, cidade, estado) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', 
-  [nome, cnpj, telefone, email, site, cep, logradouro, numero, complemento, bairro, cidade, estado], 
-  (error, results) => {
-      if (error) {
-          return res.status(500).json({ error });
+  pool.query(
+      'INSERT INTO Instituicoes (nome, cnpj, inscricaoEstadual, razaoSocial, logradouro, numero, complemento, bairro, cidade, estado, pais, cep) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', 
+      [nome, cnpj, inscricaoEstadual, razaoSocial, logradouro, numero, complemento, bairro, cidade, estado, pais, cep], 
+      (error, results) => {
+          if (error) {
+              return res.status(500).json({ success: false, message: error.message });
+          }
+
+          const instituicaoId = results.insertId;
+
+          contatos.forEach(contact => {
+              pool.query(
+                  'INSERT INTO Contatos (instituicaoId, categoria, categoriaEspecifica, nomeCompleto, telefone) VALUES (?, ?, ?, ?, ?)',
+                  [instituicaoId, contact.categoria, contact.categoriaEspecifica, contact.nomeCompleto, contact.telefone],
+                  (error, results) => {
+                      if (error) {
+                          console.error("Erro ao inserir contato:", error);
+                      }
+                  }
+              );
+          });
+
+          unidades.forEach(unit => {
+              pool.query(
+                  'INSERT INTO Unidades (instituicaoId, unidade) VALUES (?, ?)',
+                  [instituicaoId, unit],
+                  (error, results) => {
+                      if (error) {
+                          console.error("Erro ao inserir unidade:", error);
+                      }
+                  }
+              );
+          });
+
+          setores.forEach(sector => {
+              pool.query(
+                  'INSERT INTO Setores (instituicaoId, setor) VALUES (?, ?)',
+                  [instituicaoId, sector],
+                  (error, results) => {
+                      if (error) {
+                          console.error("Erro ao inserir setor:", error);
+                      }
+                  }
+              );
+          });
+
+          cargos.forEach(job => {
+              pool.query(
+                  'INSERT INTO Cargos (instituicaoId, cargo) VALUES (?, ?)',
+                  [instituicaoId, job],
+                  (error, results) => {
+                      if (error) {
+                          console.error("Erro ao inserir cargo:", error);
+                      }
+                  }
+              );
+          });
+
+          usuarios.forEach(user => {
+              pool.query(
+                  'INSERT INTO Usuarios (instituicaoId, nome, identificador) VALUES (?, ?, ?)',
+                  [instituicaoId, user.nome, user.identificador],
+                  (error, results) => {
+                      if (error) {
+                          console.error("Erro ao inserir usuário:", error);
+                      }
+                  }
+              );
+          });
+
+          res.status(200).json({ success: true, message: 'Instituição e informações associadas salvas com sucesso!' });
       }
-
-      const instituicaoId = results.insertId;
-
-      contatos.forEach(contact => {
-          pool.query('INSERT INTO Contatos (instituicaoId, categoria, nomeCompleto, telefone, email) VALUES (?, ?, ?, ?, ?)',
-          [instituicaoId, contact.categoria, contact.nomeCompleto, contact.telefone, contact.email],
-          (error) => {
-              if (error) {
-                  console.error("Erro ao inserir contato:", error);
-              }
-          });
-      });
-
-      unidades.forEach(unidade => {
-          pool.query('INSERT INTO Unidades (instituicaoId, nome, descricao) VALUES (?, ?, ?)',
-          [instituicaoId, unidade.nome, unidade.descricao],
-          (error) => {
-              if (error) {
-                  console.error("Erro ao inserir unidade:", error);
-              }
-          });
-      });
-
-      setores.forEach(setor => {
-          pool.query('INSERT INTO Setores (instituicaoId, nome, descricao) VALUES (?, ?, ?)',
-          [instituicaoId, setor.nome, setor.descricao],
-          (error) => {
-              if (error) {
-                  console.error("Erro ao inserir setor:", error);
-              }
-          });
-      });
-
-      cargos.forEach(cargo => {
-          pool.query('INSERT INTO Cargos (instituicaoId, nome, descricao) VALUES (?, ?, ?)',
-          [instituicaoId, cargo.nome, cargo.descricao],
-          (error) => {
-              if (error) {
-                  console.error("Erro ao inserir cargo:", error);
-              }
-          });
-      });
-
-      usuarios.forEach(usuario => {
-          pool.query('INSERT INTO Usuarios (instituicaoId, nome, email, senha) VALUES (?, ?, ?, ?)',
-          [instituicaoId, usuario.nome, usuario.email, usuario.senha],
-          (error) => {
-              if (error) {
-                  console.error("Erro ao inserir usuário:", error);
-              }
-          });
-      });
-
-      res.status(200).json({ message: 'Instituição e informações associadas salvas com sucesso!' });
-  });
+  );
 });
+
 
 
 
