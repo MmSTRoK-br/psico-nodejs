@@ -326,6 +326,53 @@ app.use((req, res, next) => {
   next();
 });
 
+// 1. Obter todos os usuários
+app.get('/usuarios', async (req, res) => {
+  try {
+      const [rows] = await pool.query('SELECT * FROM cadastro_clientes');
+      res.json(rows);
+  } catch (error) {
+      console.error(error);
+      res.status(500).send('Erro ao buscar usuários.');
+  }
+});
+
+// 2. Atualizar um usuário
+app.put('/usuarios/:id', async (req, res) => {
+  const userId = req.params.id;
+  const userData = req.body;
+
+  try {
+      const result = await pool.query('UPDATE cadastro_clientes SET ? WHERE id = ?', [userData, userId]);
+      if (result[0].affectedRows === 0) {
+          res.status(404).send('Usuário não encontrado.');
+          return;
+      }
+      res.send('Usuário atualizado com sucesso.');
+  } catch (error) {
+      console.error(error);
+      res.status(500).send('Erro ao atualizar usuário.');
+  }
+});
+
+// 3. Deletar um usuário
+app.delete('/usuarios/:id', async (req, res) => {
+  const userId = req.params.id;
+
+  try {
+      const result = await pool.query('DELETE FROM cadastro_clientes WHERE id = ?', [userId]);
+      if (result[0].affectedRows === 0) {
+          res.status(404).send('Usuário não encontrado.');
+          return;
+      }
+      res.send('Usuário deletado com sucesso.');
+  } catch (error) {
+      console.error(error);
+      res.status(500).send('Erro ao deletar usuário.');
+  }
+});
+
+
 const port = process.env.PORT || 5000;
 
 app.listen(port, () => console.log(`Server is running on port ${port}`));
