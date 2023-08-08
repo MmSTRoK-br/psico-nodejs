@@ -326,6 +326,17 @@ app.use((req, res, next) => {
   next();
 });
 
+app.get('/usercount', async (req, res) => {
+  try {
+      const [rows] = await pool.query('SELECT COUNT(*) as count FROM cadastro_clientes');
+      res.json({ count: rows[0].count });
+  } catch (error) {
+      console.error(error);
+      res.status(500).send('Erro ao buscar contagem de usuários.');
+  }
+});
+
+
 // 1. Obter todos os usuários
 app.get('/usuarios', async (req, res) => {
   try {
