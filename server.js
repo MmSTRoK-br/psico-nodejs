@@ -337,23 +337,62 @@ app.get('/usuarios', async (req, res) => {
   }
 });
 
-// 2. Atualizar um usuário
-app.put('/usuarios/:id', async (req, res) => {
-  const userId = req.params.id;
-  const userData = req.body;
+app.put('/cadastro_clientes/:id', async (req, res) => {
+  const id = req.params.id;
+  const {
+      name, surname, email, birthDate, gender, phone, phone2, cpf, cnpj,
+      registration, obs, address, number, complement, district, city, state,
+      country, zipCode, unit, sector, role, institution, accessRecovery, access
+  } = req.body;
 
   try {
-      const result = await pool.query('UPDATE cadastro_clientes SET ? WHERE id = ?', [userData, userId]);
-      if (result[0].affectedRows === 0) {
-          res.status(404).send('Usuário não encontrado.');
-          return;
-      }
-      res.send('Usuário atualizado com sucesso.');
+      const connection = await pool.getConnection();
+
+      const query = `
+          UPDATE cadastro_clientes SET
+              name = ?,
+              surname = ?,
+              email = ?,
+              birthDate = ?,
+              gender = ?,
+              phone = ?,
+              phone2 = ?,
+              cpf = ?,
+              cnpj = ?,
+              registration = ?,
+              obs = ?,
+              address = ?,
+              number = ?,
+              complement = ?,
+              district = ?,
+              city = ?,
+              state = ?,
+              country = ?,
+              zipCode = ?,
+              unit = ?,
+              sector = ?,
+              role = ?,
+              institution = ?,
+              accessRecovery = ?,
+              access = ?
+          WHERE id = ?
+      `;
+
+      await connection.query(query, [
+          name, surname, email, birthDate, gender, phone, phone2, cpf, cnpj,
+          registration, obs, address, number, complement, district, city, state,
+          country, zipCode, unit, sector, role, institution, accessRecovery, access,
+          id
+      ]);
+
+      connection.release();
+      res.status(200).json({ message: 'Usuário atualizado com sucesso!' });
   } catch (error) {
-      console.error(error);
-      res.status(500).send('Erro ao atualizar usuário.');
+      console.error('Erro ao atualizar usuário:', error);
+      res.status(500).json({ message: 'Erro ao atualizar usuário.' });
   }
 });
+
 
 // 3. Deletar um usuário
 app.delete('/usuarios/:id', async (req, res) => {
