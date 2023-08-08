@@ -218,6 +218,69 @@ app.post('/instituicoes', (req, res) => {
       }
   );
 });
+app.post('/instituicoes', async (req, res) => {
+  const {
+    nome, cnpj, inscricaoEstadual, razaoSocial, logradouro, numero, complemento,
+    bairro, cidade, estado, pais, cep, contatos, unidades, setores, cargos, usuarios
+  } = req.body;
+
+  // Inserir na tabela Instituicoes primeiro
+  const queryInstituicoes = `
+    INSERT INTO Instituicoes (nome, cnpj, inscricaoEstadual, razaoSocial, logradouro, numero, complemento, bairro, cidade, estado, pais, cep)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `;
+
+  try {
+    const [resultInstituicoes] = await connection.query(queryInstituicoes, [nome, cnpj, inscricaoEstadual, razaoSocial, logradouro, numero, complemento, bairro, cidade, estado, pais, cep]);
+    const instituicaoId = resultInstituicoes.insertId;
+
+    // Inserir contatos
+    for (let contato of contatos) {
+      const { categoria, categoriaEspecifica, nomeCompleto, telefone } = contato;
+      await connection.query('INSERT INTO Contatos SET ?', {
+        categoria, categoriaEspecifica, nomeCompleto, telefone, instituicaoId
+      });
+    }
+
+    // Inserir unidades
+    for (let unidade of unidades) {
+      await connection.query('INSERT INTO Unidades SET ?', {
+        unidade: unidade, // Supondo que 'unidade' seja uma string
+        instituicaoId
+      });
+    }
+
+    // Inserir setores
+    for (let setor of setores) {
+      await connection.query('INSERT INTO Setores SET ?', {
+        setor: setor,
+        instituicaoId
+      });
+    }
+
+    // Inserir cargos
+    for (let cargo of cargos) {
+      await connection.query('INSERT INTO Cargos SET ?', {
+        cargo: cargo,
+        instituicaoId
+      });
+    }
+
+    // Inserir usuarios
+    for (let usuario of usuarios) {
+      const { nome, identificador } = usuario;
+      await connection.query('INSERT INTO Usuarios SET ?', {
+        nome, identificador, instituicaoId
+      });
+    }
+
+    res.status(200).send({ success: true, message: 'Instituição registrada com sucesso!' });
+
+  } catch (error) {
+    console.error('Erro ao inserir dados:', error);
+    res.status(500).send({ success: false, message: 'Erro ao inserir dados no banco.' });
+  }
+});
 
 
 
