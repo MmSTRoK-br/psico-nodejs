@@ -23,7 +23,7 @@ const pool = mysql.createPool({
 });
 
 app.use(cors({
-  origin: ['http://localhost:3000', 'https://fair-ruby-caterpillar-wig.cyclic.app'],
+  origin: ['http://localhost:3000', 'https://fair-ruby-caterpillar-wig.cyclic.app', 'https://psico-painel.vercel.app'],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
