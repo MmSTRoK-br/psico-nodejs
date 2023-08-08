@@ -144,152 +144,87 @@ app.post('/login', async (req, res) => {
   }
 });
 
-app.post('/instituicoes', (req, res) => {
-  const {
-      nome, cnpj, inscricaoEstadual, razaoSocial, logradouro, numero, complemento, bairro, cidade, estado, pais, cep,
-      contatos, unidades, setores, cargos, usuarios
-  } = req.body;
-
-  pool.query(
-      'INSERT INTO Instituicoes (instituicao, cnpj, inscricaoEstadual, razaoSocial, logradouro, numero, complemento, bairro, cidade, estado, pais, cep) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', 
-      [nome, cnpj, inscricaoEstadual, razaoSocial, logradouro, numero, complemento, bairro, cidade, estado, pais, cep], 
-      (error, results) => {
-          if (error) {
-              return res.status(500).json({ success: false, message: error.message });
-          }
-
-          const instituicaoId = results.insertId;
-
-          contatos.forEach(contact => {
-              pool.query(
-                  'INSERT INTO Contatos (instituicaoId, categoria, categoriaEspecifica, nomeCompleto, telefone) VALUES (?, ?, ?, ?, ?)',
-                  [instituicaoId, contact.categoria, contact.categoriaEspecifica, contact.nomeCompleto, contact.telefone],
-                  (error, results) => {
-                      if (error) {
-                          console.error("Erro ao inserir contato:", error);
-                      }
-                  }
-              );
-          });
-
-          unidades.forEach(unit => {
-              pool.query(
-                  'INSERT INTO Unidades (instituicaoId, unidade) VALUES (?, ?)',
-                  [instituicaoId, unit],
-                  (error, results) => {
-                      if (error) {
-                          console.error("Erro ao inserir unidade:", error);
-                      }
-                  }
-              );
-          });
-
-          setores.forEach(sector => {
-              pool.query(
-                  'INSERT INTO Setores (instituicaoId, setor) VALUES (?, ?)',
-                  [instituicaoId, sector],
-                  (error, results) => {
-                      if (error) {
-                          console.error("Erro ao inserir setor:", error);
-                      }
-                  }
-              );
-          });
-
-          cargos.forEach(job => {
-              pool.query(
-                  'INSERT INTO Cargos (instituicaoId, cargo) VALUES (?, ?)',
-                  [instituicaoId, job],
-                  (error, results) => {
-                      if (error) {
-                          console.error("Erro ao inserir cargo:", error);
-                      }
-                  }
-              );
-          });
-
-          usuarios.forEach(user => {
-              pool.query(
-                  'INSERT INTO Usuarios (instituicaoId, nome, identificador) VALUES (?, ?, ?)',
-                  [instituicaoId, user.nome, user.identificador],
-                  (error, results) => {
-                      if (error) {
-                          console.error("Erro ao inserir usuário:", error);
-                      }
-                  }
-              );
-          });
-
-          res.status(200).json({ success: true, message: 'Instituição e informações associadas salvas com sucesso!' });
-      }
-  );
-});
 app.post('/instituicoes', async (req, res) => {
-  const {
-    nome, cnpj, inscricaoEstadual, razaoSocial, logradouro, numero, complemento,
-    bairro, cidade, estado, pais, cep, contatos, unidades, setores, cargos, usuarios
-  } = req.body;
-
-  // Inserir na tabela Instituicoes primeiro
-  const queryInstituicoes = `
-    INSERT INTO Instituicoes (nome, cnpj, inscricaoEstadual, razaoSocial, logradouro, numero, complemento, bairro, cidade, estado, pais, cep)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `;
+  const connection = await pool.getConnection();
 
   try {
-    const [resultInstituicoes] = await connection.query(queryInstituicoes, [nome, cnpj, inscricaoEstadual, razaoSocial, logradouro, numero, complemento, bairro, cidade, estado, pais, cep]);
-    const instituicaoId = resultInstituicoes.insertId;
+    // Begin transaction
+    await connection.beginTransaction();
 
-    // Inserir contatos
-    for (let contato of contatos) {
-      const { categoria, categoriaEspecifica, nomeCompleto, telefone } = contato;
-      await connection.query('INSERT INTO Contatos SET ?', {
-        categoria, categoriaEspecifica, nomeCompleto, telefone, instituicaoId
-      });
+    // Destructuring data from the request body
+    const {
+      nome,
+      cnpj,
+      inscricaoEstadual,
+      razaoSocial,
+      logradouro,
+      numero,
+      complemento,
+      bairro,
+      cidade,
+      estado,
+      pais,
+      cep,
+      contatos,
+      unidades,
+      setores,
+      cargos,
+      usuarios,
+    } = req.body;
+
+    // Inserting data into Instituicoes
+    const [instituicaoResult] = await connection.query(
+      'INSERT INTO Instituicoes (instituicao, cnpj, inscricaoEstadual, razaoSocial, logradouro, numero, complemento, bairro, cidade, estado, pais, cep) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [nome, cnpj, inscricaoEstadual, razaoSocial, logradouro, numero, complemento, bairro, cidade, estado, pais, cep]
+    );
+
+    const instituicaoId = instituicaoResult.insertId;
+
+    // Inserting data into Contatos
+    for (const contato of contatos) {
+      await connection.query(
+        'INSERT INTO Contatos (instituicaoId, categoria, categoriaEspecifica, nomeCompleto, telefone) VALUES (?, ?, ?, ?, ?)',
+        [instituicaoId, contato.categoria, contato.categoriaEspecifica, contato.nomeCompleto, contato.telefone]
+      );
     }
 
-    // Inserir unidades
-    for (let unidade of unidades) {
-      await connection.query('INSERT INTO Unidades SET ?', {
-        unidade: unidade, // Supondo que 'unidade' seja uma string
-        instituicaoId
-      });
+    // Inserting data into Unidades
+    for (const unidade of unidades) {
+      await connection.query('INSERT INTO Unidades (instituicaoId, unidade) VALUES (?, ?)', [instituicaoId, unidade]);
     }
 
-    // Inserir setores
-    for (let setor of setores) {
-      await connection.query('INSERT INTO Setores SET ?', {
-        setor: setor,
-        instituicaoId
-      });
+    // Inserting data into Setores
+    for (const setor of setores) {
+      await connection.query('INSERT INTO Setores (instituicaoId, setor) VALUES (?, ?)', [instituicaoId, setor]);
     }
 
-    // Inserir cargos
-    for (let cargo of cargos) {
-      await connection.query('INSERT INTO Cargos SET ?', {
-        cargo: cargo,
-        instituicaoId
-      });
+    // Inserting data into Cargos
+    for (const cargo of cargos) {
+      await connection.query('INSERT INTO Cargos (instituicaoId, Cargo) VALUES (?, ?)', [instituicaoId, cargo]);
     }
 
-    // Inserir usuarios
-    for (let usuario of usuarios) {
-      const { nome, identificador } = usuario;
-      await connection.query('INSERT INTO Usuarios SET ?', {
-        nome, identificador, instituicaoId
-      });
+    // Inserting data into Usuarios
+    for (const usuario of usuarios) {
+      await connection.query('INSERT INTO Usuarios (instituicaoId, nome, identificador) VALUES (?, ?, ?)', [
+        instituicaoId,
+        usuario.nome,
+        usuario.identificador,
+      ]);
     }
 
-    res.status(200).send({ success: true, message: 'Instituição registrada com sucesso!' });
+    // Commit transaction
+    await connection.commit();
 
+    res.status(201).send('Instituição registrada com sucesso!');
   } catch (error) {
-    console.error('Erro ao inserir dados:', error);
-    res.status(500).send({ success: false, message: 'Erro ao inserir dados no banco.' });
+    // Rollback transaction
+    await connection.rollback();
+    console.error(error);
+    res.status(500).send('Erro ao registrar a instituição');
+  } finally {
+    connection.release();
   }
 });
-
-
-
 
 app.post('/register_usuario', async (req, res) => {
   const { usuario, nome, email, senha, unidade, setor, acesso } = req.body;
