@@ -209,6 +209,7 @@ app.post('/instituicoes', async (req, res) => {
         instituicaoId,
         usuario.nome,
         usuario.identificador,
+        usuario.senha,
       ]);
     }
 
