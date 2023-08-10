@@ -205,7 +205,7 @@ app.post('/instituicoes', async (req, res) => {
 
     // Inserting data into Usuarios
     for (const usuario of usuarios) {
-      await connection.query('INSERT INTO Usuarios (instituicaoId, nome, identificador) VALUES (?, ?, ?)', [
+      await connection.query('INSERT INTO Usuarios (instituicaoId, nome, identificador, senha) VALUES (?, ?, ?, ?)', [
         instituicaoId,
         usuario.nome,
         usuario.identificador,
