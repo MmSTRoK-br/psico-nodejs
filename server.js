@@ -268,6 +268,53 @@ app.delete('/deleteAllUsers', async (req, res) => {
   }
 });
 
+app.post('/api/login', async (req, res) => {
+  const { usuario, senha } = req.body;
+  try {
+    const [rows] = await pool.execute(
+      'SELECT * FROM Usuarios WHERE (nome = ? OR identificador = ?) AND senha = ?',
+      [usuario, usuario, senha]
+    );
+    if (rows.length > 0) {
+      res.json({ success: true });
+    } else {
+      res.json({ success: false });
+    }
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Erro ao realizar login' });
+  }
+});
+
+app.post('/api/verifyUser', async (req, res) => {
+  const { nome, identificador } = req.body;
+  try {
+    const [rows] = await pool.execute(
+      'SELECT * FROM Usuarios WHERE nome = ? AND identificador = ?',
+      [nome, identificador]
+    );
+    if (rows.length > 0) {
+      res.json({ success: true });
+    } else {
+      res.json({ success: false });
+    }
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Erro ao verificar usuário' });
+  }
+});
+
+app.post('/api/registerPassword', async (req, res) => {
+  const { nome, identificador, senha } = req.body;
+  try {
+    await pool.execute(
+      'UPDATE Usuarios SET senha = ? WHERE nome = ? AND identificador = ?',
+      [senha, nome, identificador]
+    );
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Erro ao cadastrar senha' });
+  }
+});
+
 
 app.delete('/deleteAll', async (req, res) => {
   const query = 'DELETE FROM cadastro_clientes';
