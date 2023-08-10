@@ -227,6 +227,40 @@ app.post('/instituicoes', async (req, res) => {
   }
 });
 
+app.post("/api/admin/login", (req, res) => {
+  const { identificador, senha } = req.body;
+
+  // Query to find user with the provided identifier and password
+  const query = "SELECT * FROM Usuarios WHERE identificador = ? AND senha = ?";
+
+  connection.query(query, [identificador, senha], (error, results) => {
+    if (error) {
+      console.error(error);
+      return res.status(500).json({ error: "Internal Server Error" });
+    }
+
+    if (results.length > 0) {
+      const user = results[0];
+
+      // Create a token with the user's information
+      const token = jwt.sign(
+        {
+          id: user.id,
+          nome: user.nome,
+          instituicao: user.instituicaoId,
+        },
+        jwtSecret, // Replace with your secret key
+        { expiresIn: "1h" }
+      );
+
+      // Send the token and institution back
+      res.json({ token, instituicao: user.instituicaoId });
+    } else {
+      res.status(401).json({ error: "Authentication Failed" });
+    }
+  });
+});
+
 app.post('/register_usuario', async (req, res) => {
   const { usuario, nome, email, senha, unidade, setor, acesso } = req.body;
 
@@ -268,6 +302,30 @@ app.delete('/deleteAllUsers', async (req, res) => {
     if (connection) connection.release();
   }
 });
+
+// In server.js
+
+app.post("/api/user/login", (req, res) => {
+  const { email, senha } = req.body;
+
+  // Query to find user with the provided email and password
+  const query = "SELECT * FROM cadastro_clientes WHERE email = ? AND senha = ?";
+
+  connection.query(query, [email, senha], (error, results) => {
+    if (error) {
+      console.error(error);
+      return res.status(500).json({ error: "Internal Server Error" });
+    }
+
+    if (results.length > 0) {
+      // Authentication successful
+      res.json({ success: true });
+    } else {
+      res.status(401).json({ error: "Authentication Failed" });
+    }
+  });
+});
+
 
 app.post('/api/login', async (req, res) => {
   const { usuario, senha } = req.body;
