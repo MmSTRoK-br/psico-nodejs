@@ -205,13 +205,15 @@ app.post('/instituicoes', async (req, res) => {
 
     // Inserting data into Usuarios
     for (const usuario of usuarios) {
-      await connection.query('INSERT INTO Usuarios (instituicaoId, nome, identificador, senha) VALUES (?, ?, ?, ?)', [
+      await connection.query('INSERT INTO Usuarios (instituicaoId, nome, identificador, senha, acesso) VALUES (?, ?, ?, ?, ?)', [
         instituicaoId,
         usuario.nome,
         usuario.identificador,
         usuario.senha,
+        'Administrador', // Acesso padrão para Administrador
       ]);
     }
+
 
     // Commit transaction
     await connection.commit();
