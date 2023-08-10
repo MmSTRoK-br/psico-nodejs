@@ -235,7 +235,8 @@ app.post("/api/admin/login", (req, res) => {
   // Query to find user with the provided identifier and password
   const query = "SELECT * FROM Usuarios WHERE identificador = ? AND senha = ?";
 
-  connection.query(query, [identificador, senha], (error, results) => {
+  // Utilize o pool de conexões para executar a query
+  pool.query(query, [identificador, senha], (error, results) => {
     if (error) {
       console.error(error);
       return res.status(500).json({ error: "Internal Server Error" });
@@ -262,6 +263,7 @@ app.post("/api/admin/login", (req, res) => {
     }
   });
 });
+
 
 app.post('/register_usuario', async (req, res) => {
   const { usuario, nome, email, senha, unidade, setor, acesso } = req.body;
