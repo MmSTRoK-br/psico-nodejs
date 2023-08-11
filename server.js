@@ -105,23 +105,22 @@ app.post('/register', async (req, res) => {
 
 
 app.post('/login', async (req, res) => {
-  const { usuario, senha } = req.body;
+  const { identificador, senha } = req.body; // Mudança aqui
 
-  const query = 'SELECT * FROM login_register WHERE usuario = ?';
+  const query = 'SELECT * FROM Usuarios WHERE identificador = ?'; // Mudança aqui
 
   try {
     const connection = await pool.getConnection();
-    const [results] = await connection.query(query, [usuario]);
+    const [results] = await connection.query(query, [identificador]); // Mudança aqui
     
     if (results.length === 0) {
-      console.log('Nenhum usuário encontrado com o nome de usuário fornecido');
+      console.log('Nenhum usuário encontrado com o identificador fornecido'); // Mudança aqui
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
     const user = results[0];
 
-    const isMatch = bcrypt.compareSync(senha, user.senha);
-    if (!isMatch) {
+    if (senha !== user.senha) { // Mudança aqui (comparação direta)
       console.log('Senha fornecida não corresponde à senha do usuário no banco de dados');
       return res.status(401).json({ success: false, message: 'Wrong password' });
     }
@@ -135,7 +134,7 @@ app.post('/login', async (req, res) => {
     res.cookie('token', token, { httpOnly: true });
     console.log('Login bem sucedido, token gerado:', token);
     
-    res.json({ success: true, username: user.usuario, role: user.acesso, token });
+    res.json({ success: true, username: user.identificador, role: user.acesso, token }); // Mudança aqui
   } catch (err) {
     console.log('Erro na consulta do banco de dados:', err);
     return res.status(500).json({ success: false, message: 'Database query error' });
@@ -228,49 +227,6 @@ app.post('/instituicoes', async (req, res) => {
     connection.release();
   }
 });
-
-app.post("/api/admin/login", (req, res) => {
-  const { identificador, senha } = req.body;
-
-  // Logando os valores recebidos
-  console.log("Identificador recebido:", identificador);
-  console.log("Senha recebida:", senha);
-
-  // Query to find user with the provided identifier and password
-  const query = "SELECT * FROM Usuarios WHERE identificador = ? AND senha = ?";
-
-  // Utilize o pool de conexões para executar a query
-  pool.query(query, [identificador, senha], (error, results) => {
-    if (error) {
-      console.error("Erro ao executar a consulta:", error); // Logando o erro da consulta
-      return res.status(500).json({ error: "Internal Server Error" });
-    }
-
-    if (results.length > 0) {
-      console.log("Usuário encontrado:", results[0]); // Logando o usuário encontrado
-      const user = results[0];
-
-      // Create a token with the user's information
-      const token = jwt.sign(
-        {
-          id: user.id,
-          nome: user.nome,
-          instituicao: user.instituicaoId,
-        },
-        jwtSecret, // Replace with your secret key
-        { expiresIn: "1h" }
-      );
-
-      // Send the token and institution back
-      res.json({ token, instituicao: user.instituicaoId });
-    } else {
-      console.log("Falha na autenticação. Usuário não encontrado."); // Logando a falha na autenticação
-      res.status(401).json({ error: "Authentication Failed" });
-    }
-  });
-});
-
-
 
 app.post('/register_usuario', async (req, res) => {
   const { usuario, nome, email, senha, unidade, setor, acesso } = req.body;
