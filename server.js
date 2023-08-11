@@ -233,7 +233,7 @@ app.post("/api/admin/login", (req, res) => {
   const { identificador, senha } = req.body;
 
   // Query to find user with the provided identifier and password
-  const query = "SELECT * FROM Usuarios WHERE Identificador = ? AND senha = ?";
+  const query = "SELECT * FROM Usuarios WHERE Identificador = ? AND Senha = ?";
 
   // Utilize o pool de conexões para executar a query
   pool.query(query, [identificador, senha], (error, results) => {
