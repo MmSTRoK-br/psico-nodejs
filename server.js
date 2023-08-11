@@ -105,13 +105,13 @@ app.post('/register', async (req, res) => {
 
 
 app.post('/login', async (req, res) => {
-  const { identificador, senha } = req.body;
+  const { usuario, senha } = req.body;
 
-  const query = 'SELECT * FROM Usuario WHERE identificador = ?';
+  const query = 'SELECT * FROM login_register WHERE usuario = ?';
 
   try {
     const connection = await pool.getConnection();
-    const [results] = await connection.query(query, [identificador]);
+    const [results] = await connection.query(query, [usuario]);
     
     if (results.length === 0) {
       console.log('Nenhum usuário encontrado com o nome de usuário fornecido');
@@ -135,7 +135,7 @@ app.post('/login', async (req, res) => {
     res.cookie('token', token, { httpOnly: true });
     console.log('Login bem sucedido, token gerado:', token);
     
-    res.json({ success: true, username: user.identificador, role: user.acesso, token });
+    res.json({ success: true, username: user.usuario, role: user.acesso, token });
   } catch (err) {
     console.log('Erro na consulta do banco de dados:', err);
     return res.status(500).json({ success: false, message: 'Database query error' });
@@ -233,7 +233,7 @@ app.post("/api/admin/login", (req, res) => {
   const { identificador, senha } = req.body;
 
   // Query to find user with the provided identifier and password
-  const query = "SELECT * FROM Usuarios WHERE identificador = ? AND senha = ?";
+  const query = "SELECT * FROM Usuarios WHERE Identificador = ? AND senha = ?";
 
   // Utilize o pool de conexões para executar a query
   pool.query(query, [identificador, senha], (error, results) => {
