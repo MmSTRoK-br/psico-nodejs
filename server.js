@@ -181,6 +181,9 @@ app.post('/instituicoes', async (req, res) => {
 
     // Inserting data into Contatos
     for (const contato of contatos) {
+      
+      console.log('Inserindo contato:', instituicaoId, instituicaoNome, contato.categoria, contato.categoriaEspecifica, contato.nomeCompleto, contato.telefone);
+ 
       await connection.query(
         'INSERT INTO Contatos (instituicaoId, categoria, categoriaEspecifica, nomeCompleto, telefone, instituicaoNome) VALUES (?, ?, ?, ?, ?, ?)',
         [instituicaoId,contato.categoria, contato.categoriaEspecifica, contato.nomeCompleto, contato.telefone,instituicaoNome]
@@ -204,6 +207,9 @@ app.post('/instituicoes', async (req, res) => {
 
     // Inserting data into Usuarios
     for (const usuario of usuarios) {
+      
+      console.log('Inserindo usuário:', instituicaoId, instituicaoNome, usuario.nome, usuario.identificador, usuario.senha, 'Administrador');
+  
       await connection.query('INSERT INTO Usuarios (instituicaoId,instituicaoNome, nome, identificador, senha, acesso) VALUES (?, ?, ?, ?, ?, ?)', [
         instituicaoId,
         instituicaoNome,
