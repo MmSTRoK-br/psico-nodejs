@@ -176,35 +176,37 @@ app.post('/instituicoes', async (req, res) => {
       [nome, cnpj, inscricaoEstadual, razaoSocial, logradouro, numero, complemento, bairro, cidade, estado, pais, cep]
     );
 
-    const instituicaoId = nome;
+    const instituicaoId = instituicaoResult.insertId;
+    const instituicaoNome = nome; // Nome da instituição
 
     // Inserting data into Contatos
     for (const contato of contatos) {
       await connection.query(
-        'INSERT INTO Contatos (instituicaoId, categoria, categoriaEspecifica, nomeCompleto, telefone) VALUES (?, ?, ?, ?, ?)',
-        [instituicaoId, contato.categoria, contato.categoriaEspecifica, contato.nomeCompleto, contato.telefone]
+        'INSERT INTO Contatos (instituicaoId, instituicaoNome, categoria, categoriaEspecifica, nomeCompleto, telefone) VALUES (?, ?, ?, ?, ?, ?)',
+        [instituicaoId, instituicaoNome,contato.categoria, contato.categoriaEspecifica, contato.nomeCompleto, contato.telefone]
       );
     }
 
     // Inserting data into Unidades
     for (const unidade of unidades) {
-      await connection.query('INSERT INTO Unidades (instituicaoId, unidade) VALUES (?, ?)', [instituicaoId, unidade]);
+      await connection.query('INSERT INTO Unidades (instituicaoId,instituicaoNome, unidade) VALUES (?, ?, ?)', [instituicaoId,instituicaoNome, unidade]);
     }
 
     // Inserting data into Setores
     for (const setor of setores) {
-      await connection.query('INSERT INTO Setores (instituicaoId, setor) VALUES (?, ?)', [instituicaoId, setor]);
+      await connection.query('INSERT INTO Setores (instituicaoId,instituicaoNome, setor) VALUES (?, ?, ?)', [instituicaoId, instituicaoNome,setor]);
     }
 
     // Inserting data into Cargos
     for (const cargo of cargos) {
-      await connection.query('INSERT INTO Cargos (instituicaoId, Cargo) VALUES (?, ?)', [instituicaoId, cargo]);
+      await connection.query('INSERT INTO Cargos (instituicaoId,instituicaoNome, Cargo) VALUES (?, ?, ?)', [instituicaoId, instituicaoNome,cargo]);
     }
 
     // Inserting data into Usuarios
     for (const usuario of usuarios) {
-      await connection.query('INSERT INTO Usuarios (instituicaoId, nome, identificador, senha, acesso) VALUES (?, ?, ?, ?, ?)', [
+      await connection.query('INSERT INTO Usuarios (instituicaoId,instituicaoNome, nome, identificador, senha, acesso) VALUES (?, ?, ?, ?, ?, ?)', [
         instituicaoId,
+        instituicaoNome,
         usuario.nome,
         usuario.identificador,
         usuario.senha,
