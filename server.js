@@ -232,17 +232,22 @@ app.post('/instituicoes', async (req, res) => {
 app.post("/api/admin/login", (req, res) => {
   const { identificador, senha } = req.body;
 
+  // Logando os valores recebidos
+  console.log("Identificador recebido:", identificador);
+  console.log("Senha recebida:", senha);
+
   // Query to find user with the provided identifier and password
-  const query = "SELECT * FROM Usuarios WHERE Identificador = ? AND Senha = ?";
+  const query = "SELECT * FROM Usuarios WHERE identificador = ? AND senha = ?";
 
   // Utilize o pool de conexões para executar a query
   pool.query(query, [identificador, senha], (error, results) => {
     if (error) {
-      console.error(error);
+      console.error("Erro ao executar a consulta:", error); // Logando o erro da consulta
       return res.status(500).json({ error: "Internal Server Error" });
     }
 
     if (results.length > 0) {
+      console.log("Usuário encontrado:", results[0]); // Logando o usuário encontrado
       const user = results[0];
 
       // Create a token with the user's information
@@ -259,10 +264,12 @@ app.post("/api/admin/login", (req, res) => {
       // Send the token and institution back
       res.json({ token, instituicao: user.instituicaoId });
     } else {
+      console.log("Falha na autenticação. Usuário não encontrado."); // Logando a falha na autenticação
       res.status(401).json({ error: "Authentication Failed" });
     }
   });
 });
+
 
 
 app.post('/register_usuario', async (req, res) => {
