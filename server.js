@@ -176,7 +176,7 @@ app.post('/instituicoes', async (req, res) => {
       [nome, cnpj, inscricaoEstadual, razaoSocial, logradouro, numero, complemento, bairro, cidade, estado, pais, cep]
     );
 
-    const instituicaoId = instituicaoResult.insertId;
+    const instituicaoId = nome;
 
     // Inserting data into Contatos
     for (const contato of contatos) {
