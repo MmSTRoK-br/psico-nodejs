@@ -105,22 +105,22 @@ app.post('/register', async (req, res) => {
 
 
 app.post('/login', async (req, res) => {
-  const { identificador, senha } = req.body; // Mudança aqui
+  const { identificador, senha } = req.body;
 
-  const query = 'SELECT * FROM Usuarios WHERE identificador = ?'; // Mudança aqui
+  const query = 'SELECT * FROM Usuarios WHERE identificador = ?';
 
   try {
     const connection = await pool.getConnection();
-    const [results] = await connection.query(query, [identificador]); // Mudança aqui
+    const [results] = await connection.query(query, [identificador]);
     
     if (results.length === 0) {
-      console.log('Nenhum usuário encontrado com o identificador fornecido'); // Mudança aqui
+      console.log('Nenhum usuário encontrado com o identificador fornecido');
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
     const user = results[0];
 
-    if (senha !== user.senha) { // Mudança aqui (comparação direta)
+    if (senha !== user.senha) {
       console.log('Senha fornecida não corresponde à senha do usuário no banco de dados');
       return res.status(401).json({ success: false, message: 'Wrong password' });
     }
@@ -131,10 +131,8 @@ app.post('/login', async (req, res) => {
       return res.status(500).json({ success: false, message: 'Failed to create token' });
     }
 
-    res.cookie('token', token, { httpOnly: true });
-    console.log('Login bem sucedido, token gerado:', token);
-    
-    res.json({ success: true, username: user.identificador, role: user.acesso, token }); // Mudança aqui
+    // Inclua o valor de 'instituicaoId' na resposta
+    res.json({ success: true, username: user.identificador, role: user.acesso, instituicaoId: user.instituicaoId, token });
   } catch (err) {
     console.log('Erro na consulta do banco de dados:', err);
     return res.status(500).json({ success: false, message: 'Database query error' });
@@ -142,6 +140,7 @@ app.post('/login', async (req, res) => {
     if (connection) connection.release();
   }
 });
+
 
 app.post('/instituicoes', async (req, res) => {
   const connection = await pool.getConnection();
