@@ -289,12 +289,11 @@ app.post("/api/user/login", async (req, res) => {
   try {
     const [results] = await pool.execute(query, [email, senha]);
     if (results.length > 0) {
-      // Lógica de login bem-sucedida
-      res.json({ success: true, message: 'Login bem-sucedido!' });
+      res.json({ success: true, message: 'Login bem-sucedido!', role: 'Visualizador' });
     } else {
-      // Lógica de login falha
       res.status(401).json({ success: false, message: 'Credenciais inválidas!' });
     }
+    
     
   } catch (error) {
     console.error(error);
