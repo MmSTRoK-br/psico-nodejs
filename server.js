@@ -290,9 +290,12 @@ app.post("/api/user/login", async (req, res) => {
     const [results] = await pool.execute(query, [email, senha]);
     if (results.length > 0) {
       // Lógica de login bem-sucedida
+      res.json({ success: true, message: 'Login bem-sucedido!' });
     } else {
       // Lógica de login falha
+      res.status(401).json({ success: false, message: 'Credenciais inválidas!' });
     }
+    
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Internal Server Error" });
