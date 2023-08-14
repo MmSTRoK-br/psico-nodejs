@@ -133,7 +133,7 @@ app.post('/login', async (req, res) => {
     }
 
     // Inclua o valor de 'instituicaoId' na resposta
-    res.json({ success: true, username: user.identificador, role: user.acesso, instituicaoId: user.instituicaoId, token });
+  res.json({ success: true, username: user.identificador, role: user.acesso, token, instituicaoNome: user.instituicaoNome }); // Inclui o nome da instituição na resposta
   } catch (err) {
     console.log('Erro na consulta do banco de dados:', err);
     return res.status(500).json({ success: false, message: 'Database query error' });
