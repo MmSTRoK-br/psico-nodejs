@@ -301,7 +301,23 @@ app.post("/api/user/login", async (req, res) => {
   }
 });
 
+// Rota para criar um novo programa
+app.post('/api/programas', async (req, res) => {
+  try {
+    const { nome_programa, link_form, instituicao_id, instituicao_name } = req.body;
 
+    // Inserir o novo programa no banco de dados
+    const newProgram = await pool.query(
+      'INSERT INTO programas (nome_programa, link_form, instituicao_id, instituicao_name) VALUES ($1, $2, $3, $4) RETURNING *',
+      [nome_programa, link_form, instituicao_id, instituicao_name]
+    );
+
+    res.json(newProgram.rows[0]);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Erro no servidor');
+  }
+});
 
 app.post('/api/login', async (req, res) => {
   const { usuario, senha } = req.body;
