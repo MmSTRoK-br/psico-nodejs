@@ -280,26 +280,25 @@ app.delete('/deleteAllUsers', async (req, res) => {
 
 // In server.js
 
-app.post("/api/user/login", (req, res) => {
+app.post("/api/user/login", async (req, res) => {
   const { email, senha } = req.body;
 
-  // Query to find user with the provided email and password
+  // Query para encontrar o usuário com o e-mail e a senha fornecidos
   const query = "SELECT * FROM cadastro_clientes WHERE email = ? AND senha = ?";
 
-  connection.query(query, [email, senha], (error, results) => {
-    if (error) {
-      console.error(error);
-      return res.status(500).json({ error: "Internal Server Error" });
-    }
-
+  try {
+    const [results] = await pool.execute(query, [email, senha]);
     if (results.length > 0) {
-      // Authentication successful
-      res.json({ success: true });
+      // Lógica de login bem-sucedida
     } else {
-      res.status(401).json({ error: "Authentication Failed" });
+      // Lógica de login falha
     }
-  });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
 });
+
 
 
 app.post('/api/login', async (req, res) => {
