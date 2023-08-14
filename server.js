@@ -301,23 +301,31 @@ app.post("/api/user/login", async (req, res) => {
   }
 });
 
-// Rota para criar um novo programa
-app.post('/api/programas', async (req, res) => {
+app.post('/programas', async (req, res) => {
   try {
-    const { nome_programa, link_form, instituicao_id, instituicao_name } = req.body;
-
-    // Inserir o novo programa no banco de dados
-    const newProgram = await pool.query(
-      'INSERT INTO programas (nome_programa, link_form, instituicao_id, instituicao_name) VALUES ($1, $2, $3, $4) RETURNING *',
-      [nome_programa, link_form, instituicao_id, instituicao_name]
-    );
-
-    res.json(newProgram.rows[0]);
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Erro no servidor');
+      const { nome_programa, link_form } = req.body;
+      const connection = await pool.getConnection();
+      const [result] = await connection.query('INSERT INTO programas (nome_programa, link_form) VALUES (?, ?)', [nome_programa, link_form]);
+      connection.release();
+      res.json({ success: true, message: 'Programa criado com sucesso!' });
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ success: false, message: 'Erro ao criar programa' });
   }
 });
+
+app.get('/programas', async (req, res) => {
+  try {
+      const connection = await pool.getConnection();
+      const [result] = await connection.query('SELECT * FROM programas');
+      connection.release();
+      res.json(result);
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ success: false, message: 'Erro ao listar programas' });
+  }
+});
+
 
 app.post('/api/login', async (req, res) => {
   const { usuario, senha } = req.body;
