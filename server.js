@@ -323,7 +323,7 @@ app.post('/api/verifyUser', async (req, res) => {
   const { name, email } = req.body;
   try {
     const [rows] = await pool.execute(
-      'SELECT * FROM cadastro_usuarios WHERE name = ? AND email = ?',
+      'SELECT * FROM cadastro_clientes WHERE name = ? AND email = ?',
       [name, email]
     );
     if (rows.length > 0) {
