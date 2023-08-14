@@ -306,7 +306,7 @@ app.post('/api/login', async (req, res) => {
   const { usuario, senha } = req.body;
   try {
     const [rows] = await pool.execute(
-      'SELECT * FROM Usuarios WHERE (nome = ? OR identificador = ?) AND senha = ?',
+      'SELECT * FROM cadastro_clientes WHERE email AND senha = ?',
       [usuario, usuario, senha]
     );
     if (rows.length > 0) {
