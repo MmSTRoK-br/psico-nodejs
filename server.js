@@ -289,28 +289,44 @@ app.post("/api/user/login", async (req, res) => {
   try {
     const [results] = await pool.execute(query, [email, senha]);
     if (results.length > 0) {
-      res.json({ success: true, message: 'Login bem-sucedido!', role: 'Visualizador' });
+      const user = results[0];
+
+      // Gerar um token JWT (ou outro mecanismo de autenticação)
+      const token = jwt.sign({ userId: user.id }, jwtSecret, { expiresIn: '1h' });
+
+      res.json({
+        success: true,
+        message: 'Login bem-sucedido!',
+        token: token,
+        username: user.nome, // Supondo que o nome do usuário está na coluna 'nome'
+        instituicaoNome: user.instituicaoNome,
+        role: 'Visualizador',
+        birthDate: user.birthDate,
+        cpf: user.cpf
+      });
     } else {
       res.status(401).json({ success: false, message: 'Credenciais inválidas!' });
     }
-    
-    
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
+
 app.post('/programas', async (req, res) => {
   try {
-      const { nome_programa, link_form } = req.body;
-      const connection = await pool.getConnection();
-      const [result] = await connection.query('INSERT INTO programas (nome_programa, link_form) VALUES (?, ?)', [nome_programa, link_form]);
-      connection.release();
-      res.json({ success: true, message: 'Programa criado com sucesso!' });
+    const { nome_programa, link_form, instituicaoNome } = req.body; // Extraia instituicaoNome
+    const connection = await pool.getConnection();
+    const [result] = await connection.query(
+      'INSERT INTO programas (nome_programa, link_form, instituicaoNome) VALUES (?, ?, ?)',
+      [nome_programa, link_form, instituicaoNome] // Inclua instituicaoNome
+    );
+    connection.release();
+    res.json({ success: true, message: 'Programa criado com sucesso!' });
   } catch (error) {
-      console.error(error);
-      res.status(500).json({ success: false, message: 'Erro ao criar programa' });
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Erro ao criar programa' });
   }
 });
 
