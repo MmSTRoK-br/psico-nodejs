@@ -336,7 +336,7 @@ app.get('/programas', async (req, res) => {
     const institution = req.query.institution; // Pegue a institution da query string
     const connection = await pool.getConnection();
     // Modifique a consulta para filtrar com base na institution
-    const [result] = await connection.query('SELECT * FROM programas WHERE instituicaoNome = ?', [institution]);
+    const [result] = await connection.query('SELECT * FROM programas WHERE instituicaoNome = ?', [instituicaoNome]);
     connection.release();
     res.json(result);
   } catch (error) {
