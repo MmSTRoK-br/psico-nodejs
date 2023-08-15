@@ -89,6 +89,7 @@ app.post('/register', async (req, res) => {
     institution,
     accessRecovery,
     access, 
+
   ];
 
   try {
@@ -332,15 +333,18 @@ app.post('/programas', async (req, res) => {
 
 app.get('/programas', async (req, res) => {
   try {
-      const connection = await pool.getConnection();
-      const [result] = await connection.query('SELECT * FROM programas');
-      connection.release();
-      res.json(result);
+    const institution = req.query.institution; // Pegue a institution da query string
+    const connection = await pool.getConnection();
+    // Modifique a consulta para filtrar com base na institution
+    const [result] = await connection.query('SELECT * FROM programas WHERE institution = ?', [institution]);
+    connection.release();
+    res.json(result);
   } catch (error) {
-      console.error(error);
-      res.status(500).json({ success: false, message: 'Erro ao listar programas' });
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Erro ao listar programas' });
   }
 });
+
 
 
 app.post('/api/login', async (req, res) => {
