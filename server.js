@@ -59,11 +59,10 @@ app.post('/register', async (req, res) => {
     institution,
     accessRecovery,
     access, 
-    instituicaoNome 
   } = req.body;
 
   const query =
-    'INSERT INTO cadastro_clientes (name, surname, email, birthDate, gender, phone, phone2, cpf, cnpj, registration, obs, address, number, complement, district, city, state, country, zipCode, unit, sector, role, institution, accessRecovery, instituicaoNome) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+    'INSERT INTO cadastro_clientes (name, surname, email, birthDate, gender, phone, phone2, cpf, cnpj, registration, obs, address, number, complement, district, city, state, country, zipCode, unit, sector, role, institution, accessRecovery) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
   const values = [
     name,
     surname,
@@ -90,7 +89,6 @@ app.post('/register', async (req, res) => {
     institution,
     accessRecovery,
     access, 
-    instituicaoNome
   ];
 
   try {
