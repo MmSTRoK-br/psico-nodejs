@@ -284,6 +284,66 @@ app.get('/cargos', async (req, res) => {
   }
 });
 
+app.get('/contatos', async (req, res) => {
+  const connection = await pool.getConnection();
+  const instituicaoId = req.query.instituicaoId;
+
+  try {
+    const [contatos] = await connection.query('SELECT * FROM Contatos WHERE instituicaoId = ?', [instituicaoId]);
+    res.status(200).json(contatos);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Erro ao buscar os contatos');
+  } finally {
+    connection.release();
+  }
+});
+
+app.get('/setores', async (req, res) => {
+  const connection = await pool.getConnection();
+  const instituicaoId = req.query.instituicaoId;
+
+  try {
+    const [setores] = await connection.query('SELECT * FROM Setores WHERE instituicaoId = ?', [instituicaoId]);
+    res.status(200).json(setores);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Erro ao buscar os setores');
+  } finally {
+    connection.release();
+  }
+});
+
+app.get('/unidades', async (req, res) => {
+  const connection = await pool.getConnection();
+  const instituicaoId = req.query.instituicaoId;
+
+  try {
+    const [unidades] = await connection.query('SELECT * FROM Unidades WHERE instituicaoId = ?', [instituicaoId]);
+    res.status(200).json(unidades);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Erro ao buscar as unidades');
+  } finally {
+    connection.release();
+  }
+});
+
+app.get('/usuarios', async (req, res) => {
+  const connection = await pool.getConnection();
+  const instituicaoId = req.query.instituicaoId;
+
+  try {
+    const [usuarios] = await connection.query('SELECT * FROM Usuarios WHERE instituicaoId = ?', [instituicaoId]);
+    res.status(200).json(usuarios);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Erro ao buscar os usuários');
+  } finally {
+    connection.release();
+  }
+});
+
 
 app.post('/register_usuario', async (req, res) => {
   const { usuario, nome, email, senha, unidade, setor, acesso } = req.body;
