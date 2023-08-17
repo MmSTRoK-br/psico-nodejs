@@ -237,6 +237,21 @@ app.post('/instituicoes', async (req, res) => {
   }
 });
 
+app.get('/instituicoes', async (req, res) => {
+  const connection = await pool.getConnection();
+
+  try {
+    const [instituicoes] = await connection.query('SELECT * FROM Instituicoes');
+    res.status(200).json(instituicoes);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Erro ao buscar as instituições');
+  } finally {
+    connection.release();
+  }
+});
+
+
 app.post('/register_usuario', async (req, res) => {
   const { usuario, nome, email, senha, unidade, setor, acesso } = req.body;
 

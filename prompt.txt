@@ -1,0 +1,32 @@
+Lançamento da versão beta demonstrativa da LifeMED com o Psicossocial: https://psico-painel.vercel.app/
+
+
+A pagina "Principal" do sistema é a tela de Login do Usuario ( "/UserLogin" ), para entrar no painel administrativo é "/AdminLogin": "https://psico-painel.vercel.app/AdminLogin"
+
+- Logins
+
+Painel Administrativo:
+Tipo de conta: Conta Desenvolvedor/Administração Geral
+Identificador: Dev 
+Senha: seg@1977
+
+Tipo de conta: Conta de "Administrativa da Instituição"
+Identificador: analytics.qualityseg@gmail.com
+Senha: seg@1977 
+
+Painel de Usuarios/Pacientes:
+Tipo de conta: criado em "Novo Usuario" no painel administrativo , depois criado a senha em "Primeiro Acesso"
+Usuário : miguel.matheus@hotmail.com
+Senha: seg@1977
+
+Em funcionamento:
+
+- 2/3 camadas do sistema já estão quase 100% configuradas, a camada administrativa da Instituição que contratou o serviço e a camada de Paciente onde o mesmo realizara as avaliações que a instituição disponibilizar.
+
+- Camada de "Desenvolvedor/Administração Geral" apenas contem a pagina 
+"INSTITUIÇÕES", que é onde cadastraremos as empresas que contrataram o serviço.
+* Ainda há muita coisa para ser adicionada e ainda a pra ser melhorada no sistema, mas nessa demonstração já podemos criar uma instituição, criar um usuário associado a instituição e criar um "Programa" com nome da avaliação.
+
+Estou com 4 paginas frente e verso da minha agenda com anotações de melhorias/ideias/logica do sistema para implementar. Estou dando um foco em deixar tudo responsivo para Mobile e aplicar as normas da LGPD para que nosso sistema seja 100% seguro em relação aos dados. 
+
+Por favor, testem o sistema e me deem um feedback de coisas que preciso mudar/adicionar.
