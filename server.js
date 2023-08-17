@@ -251,6 +251,20 @@ app.get('/instituicoes', async (req, res) => {
   }
 });
 
+app.get('/instituicao-detalhes', async (req, res) => {
+  const connection = await pool.getConnection();
+  const instituicaoId = req.query.instituicaoId;
+
+  try {
+    const [instituicao] = await connection.query('SELECT * FROM Instituicoes WHERE id = ?', [instituicaoId]);
+    res.status(200).json(instituicao);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Erro ao buscar detalhes da instituição');
+  } finally {
+    connection.release();
+  }
+});
 
 app.post('/register_usuario', async (req, res) => {
   const { usuario, nome, email, senha, unidade, setor, acesso } = req.body;
