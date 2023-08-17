@@ -256,7 +256,10 @@ app.get('/instituicao-detalhes', async (req, res) => {
   const instituicaoId = req.query.instituicaoId;
 
   try {
-    const [instituicao] = await connection.query('SELECT * FROM Instituicoes WHERE id = ?', [instituicaoId]);
+    const [instituicao] = await connection.query(
+      'SELECT instituicao, cnpj, inscricaoEstadual, razaoSocial, logradouro, numero, complemento, bairro, cidade, estado, pais, cep FROM Instituicoes WHERE id = ?',
+      [instituicaoId]
+    );
     res.status(200).json(instituicao);
   } catch (error) {
     console.error(error);
@@ -265,6 +268,7 @@ app.get('/instituicao-detalhes', async (req, res) => {
     connection.release();
   }
 });
+
 
 app.post('/register_usuario', async (req, res) => {
   const { usuario, nome, email, senha, unidade, setor, acesso } = req.body;
