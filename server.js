@@ -269,6 +269,21 @@ app.get('/instituicao-detalhes', async (req, res) => {
   }
 });
 
+app.get('/cargos', async (req, res) => {
+  const connection = await pool.getConnection();
+  const instituicaoId = req.query.instituicaoId;
+
+  try {
+    const [cargos] = await connection.query('SELECT * FROM Cargos WHERE instituicaoId = ?', [instituicaoId]);
+    res.status(200).json(cargos);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Erro ao buscar os cargos');
+  } finally {
+    connection.release();
+  }
+});
+
 
 app.post('/register_usuario', async (req, res) => {
   const { usuario, nome, email, senha, unidade, setor, acesso } = req.body;
