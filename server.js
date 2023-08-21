@@ -259,20 +259,27 @@ app.post('/instituicoes', async (req, res) => {
 app.put('/instituicoes/:id', async (req, res) => {
   const connection = await pool.getConnection();
   const instituicaoId = req.params.id;
-
   const {
-    nome, cnpj, inscricaoEstadual, razaoSocial, logradouro, numero, complemento,
-    bairro, cidade, estado, pais, cep, contatos, unidades, setores, cargos, usuarios,
+    nome,
+    cnpj,
+    inscricaoEstadual,
+    razaoSocial,
+    logradouro,
+    numero,
+    complemento,
+    bairro,
+    cidade,
+    estado,
+    pais,
+    cep
   } = req.body;
 
   try {
-    // Atualizar os detalhes da instituição na tabela Instituicoes
+    // Atualizar a instituição na tabela Instituicoes
     await connection.query(
       'UPDATE Instituicoes SET nome = ?, cnpj = ?, inscricaoEstadual = ?, razaoSocial = ?, logradouro = ?, numero = ?, complemento = ?, bairro = ?, cidade = ?, estado = ?, pais = ?, cep = ? WHERE id = ?',
       [nome, cnpj, inscricaoEstadual, razaoSocial, logradouro, numero, complemento, bairro, cidade, estado, pais, cep, instituicaoId]
     );
-
-    // Atualizar outras tabelas (Contatos, Unidades, Setores, Cargos, Usuarios) se necessário
 
     res.status(200).send('Instituição atualizada com sucesso!');
   } catch (error) {
@@ -282,6 +289,7 @@ app.put('/instituicoes/:id', async (req, res) => {
     connection.release();
   }
 });
+
 
 app.delete('/instituicoes/:id', async (req, res) => {
   const connection = await pool.getConnection();
@@ -300,12 +308,10 @@ app.delete('/instituicoes/:id', async (req, res) => {
     // Excluir a instituição da tabela Instituicoes
     await connection.query('DELETE FROM Instituicoes WHERE id = ?', [instituicaoId]);
 
-    // Commit transaction
     await connection.commit();
 
     res.status(200).send('Instituição excluída com sucesso!');
   } catch (error) {
-    // Rollback transaction
     await connection.rollback();
     console.error(error);
     res.status(500).send('Erro ao excluir a instituição');
@@ -313,6 +319,7 @@ app.delete('/instituicoes/:id', async (req, res) => {
     connection.release();
   }
 });
+
 
 
 
