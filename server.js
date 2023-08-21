@@ -63,11 +63,11 @@ app.post('/register', async (req, res) => {
 
   try {
     const connection = await pool.getConnection();
-
-    // Check if a user with the same email and institution already exists
-    const [existingUsers] = await connection.query('SELECT * FROM cadastro_clientes WHERE email = ? AND instituicaoNome = ?', [email, institution]);
+    
+    // Check if a user with the same email already exists
+    const [existingUsers] = await connection.query('SELECT * FROM cadastro_clientes WHERE email = ?', [email]);
     if (existingUsers.length > 0) {
-      return res.send({ success: false, message: 'Usuário (Email de acesso) já existente na sua Instituição.' });
+      return res.send({ success: false, message: 'Usuario (Email de acesso) já existente na sua Instituição.' });
     }
 
     const query =
@@ -95,8 +95,8 @@ app.post('/register', async (req, res) => {
       unit,
       sector,
       role,
-      institution, // Saving the institution value in the institution column
-      institution, // Saving the institution value in the instituicaoNome column
+      institution,
+      institution,
       accessRecovery,
       access,
     ];
@@ -110,6 +110,7 @@ app.post('/register', async (req, res) => {
     if (connection) connection.release();
   }
 });
+
 
 
 
