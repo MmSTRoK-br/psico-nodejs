@@ -257,29 +257,22 @@ app.post('/instituicoes', async (req, res) => {
 });
 
 app.put('/instituicoes/:id', async (req, res) => {
-  const connection = await pool.getConnection();
-  const instituicaoId = req.params.id;
-
+  const { id } = req.params;
   const {
-    nome, cnpj, inscricaoEstadual, razaoSocial, logradouro, numero, complemento,
-    bairro, cidade, estado, pais, cep, contatos, unidades, setores, cargos, usuarios,
+    nome, cnpj, inscricaoEstadual, razaoSocial, logradouro, numero, complemento, bairro, cidade, estado, pais, cep
   } = req.body;
 
+  const query =
+    'UPDATE Instituicoes SET nome = ?, cnpj = ?, inscricaoEstadual = ?, razaoSocial = ?, logradouro = ?, numero = ?, complemento = ?, bairro = ?, cidade = ?, estado = ?, pais = ?, cep = ? WHERE id = ?';
+
   try {
-    // Atualizar os detalhes da instituição na tabela Instituicoes
-    await connection.query(
-      'UPDATE Instituicoes SET nome = ?, cnpj = ?, inscricaoEstadual = ?, razaoSocial = ?, logradouro = ?, numero = ?, complemento = ?, bairro = ?, cidade = ?, estado = ?, pais = ?, cep = ? WHERE id = ?',
-      [nome, cnpj, inscricaoEstadual, razaoSocial, logradouro, numero, complemento, bairro, cidade, estado, pais, cep, instituicaoId]
-    );
-
-    // Atualizar outras tabelas (Contatos, Unidades, Setores, Cargos, Usuarios) se necessário
-
+    await pool.query(query, [
+      nome, cnpj, inscricaoEstadual, razaoSocial, logradouro, numero, complemento, bairro, cidade, estado, pais, cep, id
+    ]);
     res.status(200).send('Instituição atualizada com sucesso!');
   } catch (error) {
     console.error(error);
     res.status(500).send('Erro ao atualizar a instituição');
-  } finally {
-    connection.release();
   }
 });
 
