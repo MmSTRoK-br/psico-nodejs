@@ -156,9 +156,16 @@ app.post('/login', async (req, res) => {
 
 app.post('/instituicoes', async (req, res) => {
   const connection = await pool.getConnection();
+  const { cnpj } = req.body;
 
   try {
-    // Begin transaction
+    // Verifique se já existe uma instituição com o mesmo CNPJ
+    const [existingInstitutions] = await connection.query('SELECT * FROM Instituicoes WHERE cnpj = ?', [cnpj]);
+    if (existingInstitutions.length > 0) {
+      return res.status(400).send('Erro ao cadastrar Instituição, já existe uma instituição com esse CNPJ.');
+    }
+
+    // Início da transação
     await connection.beginTransaction();
 
     // Destructuring data from the request body
@@ -232,13 +239,12 @@ app.post('/instituicoes', async (req, res) => {
       ]);
     }
 
-
-    // Commit transaction
+ // Confirmação da transação
     await connection.commit();
 
     res.status(201).send('Instituição registrada com sucesso!');
   } catch (error) {
-    // Rollback transaction
+    // Desfaz a transação
     await connection.rollback();
     console.error(error);
     res.status(500).send('Erro ao registrar a instituição');
