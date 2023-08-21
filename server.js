@@ -256,90 +256,82 @@ app.post('/instituicoes', async (req, res) => {
   }
 });
 
-app.put('/instituicoes/:instituicaoId', async (req, res) => {
-  const instituicaoId = req.params.instituicaoId;
+app.put('/instituicoes/:id', async (req, res) => {
   const connection = await pool.getConnection();
+  const instituicaoId = req.params.id;
+
+  const {
+    nome, cnpj, inscricaoEstadual, razaoSocial, logradouro, numero, complemento,
+    bairro, cidade, estado, pais, cep, contatos, unidades, setores, cargos, usuarios,
+  } = req.body;
 
   try {
-    // Begin transaction
-    await connection.beginTransaction();
-
-    // Destructuring data from the request body
-    const {
-      nome,
-      cnpj,
-      inscricaoEstadual,
-      razaoSocial,
-      logradouro,
-      numero,
-      complemento,
-      bairro,
-      cidade,
-      estado,
-      pais,
-      cep,
-      contatos,
-      unidades,
-      setores,
-      cargos,
-      usuarios,
-    } = req.body;
-
-    // Updating data in Instituicoes
+    // Atualizar os detalhes da instituição na tabela Instituicoes
     await connection.query(
-      'UPDATE Instituicoes SET instituicao = ?, cnpj = ?, inscricaoEstadual = ?, razaoSocial = ?, logradouro = ?, numero = ?, complemento = ?, bairro = ?, cidade = ?, estado = ?, pais = ?, cep = ? WHERE id = ?',
+      'UPDATE Instituicoes SET nome = ?, cnpj = ?, inscricaoEstadual = ?, razaoSocial = ?, logradouro = ?, numero = ?, complemento = ?, bairro = ?, cidade = ?, estado = ?, pais = ?, cep = ? WHERE id = ?',
       [nome, cnpj, inscricaoEstadual, razaoSocial, logradouro, numero, complemento, bairro, cidade, estado, pais, cep, instituicaoId]
     );
 
-    // Update Contatos
-    // Assuming contatos is an array of updated contact objects
-    for (const contato of contatos) {
-      await connection.query(
-        'UPDATE Contatos SET categoria = ?, categoriaEspecifica = ?, nomeCompleto = ?, telefone = ?, instituicaoNome = ? WHERE instituicaoId = ?',
-        [contato.categoria, contato.categoriaEspecifica, contato.nomeCompleto, contato.telefone, nome, instituicaoId]
-      );
-    }
+    // Atualizar outras tabelas (Contatos, Unidades, Setores, Cargos, Usuarios) se necessário
 
-    // Update Unidades
-    // Assuming unidades is an array of updated unit objects
-    for (const unidade of unidades) {
-      await connection.query('UPDATE Unidades SET unidade = ? WHERE instituicaoId = ?', [unidade, instituicaoId]);
-    }
-
-    // Update Setores
-    // Assuming setores is an array of updated sector objects
-    for (const setor of setores) {
-      await connection.query('UPDATE Setores SET setor = ? WHERE instituicaoId = ?', [setor, instituicaoId]);
-    }
-
-    // Update Cargos
-    // Assuming cargos is an array of updated position objects
-    for (const cargo of cargos) {
-      await connection.query('UPDATE Cargos SET Cargo = ? WHERE instituicaoId = ?', [cargo, instituicaoId]);
-    }
-
-    // Update Usuarios
-    // Assuming usuarios is an array of updated user objects
-    for (const usuario of usuarios) {
-      await connection.query('UPDATE Usuarios SET nome = ?, identificador = ?, senha = ?, acesso = ? WHERE instituicaoId = ?', [
-        usuario.nome, usuario.identificador, usuario.senha, 'Administrador', instituicaoId
-      ]);
-    }
-
-    // Committing the transaction
-    await connection.commit();
-
-    res.json({ success: true, message: 'Instituição atualizada com sucesso!' });
+    res.status(200).send('Instituição atualizada com sucesso!');
   } catch (error) {
-    // Rollback the transaction
-    await connection.rollback();
-    console.error("Erro ao atualizar a instituição:", error);
-    res.status(500).json({ success: false, message: 'Erro ao atualizar a instituição.' });
+    console.error(error);
+    res.status(500).send('Erro ao atualizar a instituição');
   } finally {
     connection.release();
   }
 });
 
+app.delete('/instituicoes/:id', async (req, res) => {
+  const connection = await pool.getConnection();
+  const instituicaoId = req.params.id; // ID da instituição
+
+  try {
+    // Iniciar transação
+    await connection.beginTransaction();
+
+    // Excluir dados relacionados em outras tabelas usando instituicaoId
+    await connection.query('DELETE FROM Contatos WHERE instituicaoId = ?', [instituicaoId]);
+    await connection.query('DELETE FROM Unidades WHERE instituicaoId = ?', [instituicaoId]);
+    await connection.query('DELETE FROM Setores WHERE instituicaoId = ?', [instituicaoId]);
+    await connection.query('DELETE FROM Cargos WHERE instituicaoId = ?', [instituicaoId]);
+    await connection.query('DELETE FROM Usuarios WHERE instituicaoId = ?', [instituicaoId]);
+
+    // Excluir a instituição da tabela Instituicoes usando o ID
+    await connection.query('DELETE FROM Instituicoes WHERE id = ?', [instituicaoId]);
+
+    // Confirmar transação
+    await connection.commit();
+
+    res.status(200).send('Instituição excluída com sucesso!');
+  } catch (error) {
+    // Reverter transação em caso de erro
+    await connection.rollback();
+    console.error(error);
+    res.status(500).send('Erro ao excluir a instituição');
+  } finally {
+    connection.release();
+  }
+});
+
+
+
+
+
+app.get('/instituicoes', async (req, res) => {
+  const connection = await pool.getConnection();
+
+  try {
+    const [instituicoes] = await connection.query('SELECT * FROM Instituicoes');
+    res.status(200).json(instituicoes);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Erro ao buscar as instituições');
+  } finally {
+    connection.release();
+  }
+});
 
 app.get('/instituicao-detalhes', async (req, res) => {
   const connection = await pool.getConnection();
@@ -435,28 +427,6 @@ app.get('/usuarios', async (req, res) => {
   }
 });
 
-app.delete('/instituicoes/:instituicaoId', async (req, res) => {
-  const instituicaoId = req.params.instituicaoId;
-
-  try {
-    const connection = await pool.getConnection();
-
-    // Delete related entries in other tables
-    await connection.query('DELETE FROM Contatos WHERE instituicaoId = ?', [instituicaoId]);
-    await connection.query('DELETE FROM Unidades WHERE instituicaoId = ?', [instituicaoId]);
-    await connection.query('DELETE FROM Setores WHERE instituicaoId = ?', [instituicaoId]);
-    // Add more deletion queries for other correlated tables as needed
-
-    // Delete the institution itself
-    await connection.query('DELETE FROM Instituicoes WHERE id = ?', [instituicaoId]);
-
-    connection.release();
-    res.json({ success: true, message: 'Instituição deletada com sucesso!' });
-  } catch (error) {
-    console.error("Erro ao deletar a instituição:", error);
-    res.status(500).json({ success: false, message: 'Erro ao deletar a instituição.' });
-  }
-});
 
 app.post('/register_usuario', async (req, res) => {
   const { usuario, nome, email, senha, unidade, setor, acesso } = req.body;
