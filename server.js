@@ -319,6 +319,7 @@ app.delete('/instituicoes/:id', async (req, res) => {
 
 
 
+
 app.get('/instituicoes', async (req, res) => {
   const connection = await pool.getConnection();
 
