@@ -331,10 +331,11 @@ app.get('/unidades', async (req, res) => {
 
 app.get('/usuarios', async (req, res) => {
   const connection = await pool.getConnection();
-  const instituicaoId = req.query.instituicaoId;
+  const instituicaoNome = req.query.instituicaoNome;
 
   try {
-    const [usuarios] = await connection.query('SELECT * FROM Usuarios WHERE instituicaoId = ?', [instituicaoId]);
+    // Modify the query to search users based on the institution name instead of ID
+    const [usuarios] = await connection.query('SELECT * FROM Usuarios WHERE instituicaoNome = ?', [instituicaoNome]);
     res.status(200).json(usuarios);
   } catch (error) {
     console.error(error);
