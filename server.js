@@ -175,7 +175,6 @@ app.post('/instituicoes', async (req, res) => {
     // Destructuring data from the request body
     const {
       nome,
-      cnpj,
       inscricaoEstadual,
       razaoSocial,
       logradouro,
