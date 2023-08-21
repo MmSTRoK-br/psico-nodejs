@@ -156,15 +156,19 @@ app.post('/login', async (req, res) => {
 
 app.post('/instituicoes', async (req, res) => {
   const connection = await pool.getConnection();
-  const { cnpj } = req.body;
 
   try {
-    // Verifique se já existe uma instituição com o mesmo CNPJ
+    // Begin transaction
+    await connection.beginTransaction();
+
+    // Destructuring data from the request body
+    const { cnpj } = req.body;
+
+    // Check if an institution with the same CNPJ already exists
     const [existingInstitutions] = await connection.query('SELECT * FROM Instituicoes WHERE cnpj = ?', [cnpj]);
     if (existingInstitutions.length > 0) {
-      return res.status(400).send('Erro ao cadastrar Instituição, já existe uma instituição com esse CNPJ.');
+      return res.status(400).send('Erro ao cadastrar Instituição, já existe uma instituição com esse CNPJ');
     }
-
     // Início da transação
     await connection.beginTransaction();
 
