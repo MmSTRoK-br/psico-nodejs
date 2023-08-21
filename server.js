@@ -334,8 +334,8 @@ app.get('/usuarios', async (req, res) => {
   const instituicaoNome = req.query.instituicaoNome;
 
   try {
-    // Modify the query to search users based on the institution name instead of ID
-    const [usuarios] = await connection.query('SELECT * FROM Usuarios WHERE instituicaoNome = ?', [instituicaoNome]);
+    // Modify the query to search users from the Cadastro_clientes table
+    const [usuarios] = await connection.query('SELECT * FROM Cadastro_clientes WHERE instituicaoNome = ?', [instituicaoNome]);
     res.status(200).json(usuarios);
   } catch (error) {
     console.error(error);
