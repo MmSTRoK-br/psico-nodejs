@@ -256,6 +256,56 @@ app.post('/instituicoes', async (req, res) => {
   }
 });
 
+app.put('/instituicoes/:id', async (req, res) => {
+  const connection = await pool.getConnection();
+  const instituicaoId = req.params.id;
+
+  const {
+    nome, cnpj, inscricaoEstadual, razaoSocial, logradouro, numero, complemento,
+    bairro, cidade, estado, pais, cep, contatos, unidades, setores, cargos, usuarios,
+  } = req.body;
+
+  try {
+    // Atualizar os detalhes da instituição na tabela Instituicoes
+    await connection.query(
+      'UPDATE Instituicoes SET nome = ?, cnpj = ?, inscricaoEstadual = ?, razaoSocial = ?, logradouro = ?, numero = ?, complemento = ?, bairro = ?, cidade = ?, estado = ?, pais = ?, cep = ? WHERE id = ?',
+      [nome, cnpj, inscricaoEstadual, razaoSocial, logradouro, numero, complemento, bairro, cidade, estado, pais, cep, instituicaoId]
+    );
+
+    // Atualizar outras tabelas (Contatos, Unidades, Setores, Cargos, Usuarios) se necessário
+
+    res.status(200).send('Instituição atualizada com sucesso!');
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Erro ao atualizar a instituição');
+  } finally {
+    connection.release();
+  }
+});
+
+app.delete('/instituicoes/:id', async (req, res) => {
+  const connection = await pool.getConnection();
+  const instituicaoId = req.params.id;
+
+  try {
+    // Excluir a instituição da tabela Instituicoes
+    await connection.query(
+      'DELETE FROM Instituicoes WHERE id = ?',
+      [instituicaoId]
+    );
+
+    // Excluir dados relacionados em outras tabelas (Contatos, Unidades, Setores, Cargos, Usuarios) se necessário
+
+    res.status(200).send('Instituição excluída com sucesso!');
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Erro ao excluir a instituição');
+  } finally {
+    connection.release();
+  }
+});
+
+
 app.get('/instituicoes', async (req, res) => {
   const connection = await pool.getConnection();
 
