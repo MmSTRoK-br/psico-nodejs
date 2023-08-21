@@ -56,44 +56,51 @@ app.post('/register', async (req, res) => {
     unit,
     sector,
     role,
-    institution, // Extracting the institution field
-    accessRecovery,
-    access, 
-  } = req.body;
-
-  const query =
-    'INSERT INTO cadastro_clientes (name, surname, email, birthDate, gender, phone, phone2, cpf, cnpj, registration, obs, address, number, complement, district, city, state, country, zipCode, unit, sector, role, institution, instituicaoNome, accessRecovery) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
-  const values = [
-    name,
-    surname,
-    email,
-    birthDate,
-    gender,
-    phone,
-    phone2,
-    cpf,
-    cnpj,
-    registration,
-    obs,
-    address,
-    number,
-    complement,
-    district,
-    city,
-    state,
-    country,
-    zipCode,
-    unit,
-    sector,
-    role,
-    institution, // Saving the institution value in the institution column
-    institution, // Saving the institution value in the instituicaoNome column
+    institution,
     accessRecovery,
     access,
-  ];
+  } = req.body;
 
   try {
     const connection = await pool.getConnection();
+
+    // Check if a user with the same email and institution already exists
+    const [existingUsers] = await connection.query('SELECT * FROM cadastro_clientes WHERE email = ? AND instituicaoNome = ?', [email, institution]);
+    if (existingUsers.length > 0) {
+      return res.send({ success: false, message: 'Usuário (Email de acesso) já existente na sua Instituição.' });
+    }
+
+    const query =
+      'INSERT INTO cadastro_clientes (name, surname, email, birthDate, gender, phone, phone2, cpf, cnpj, registration, obs, address, number, complement, district, city, state, country, zipCode, unit, sector, role, institution, instituicaoNome, accessRecovery) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+    const values = [
+      name,
+      surname,
+      email,
+      birthDate,
+      gender,
+      phone,
+      phone2,
+      cpf,
+      cnpj,
+      registration,
+      obs,
+      address,
+      number,
+      complement,
+      district,
+      city,
+      state,
+      country,
+      zipCode,
+      unit,
+      sector,
+      role,
+      institution, // Saving the institution value in the institution column
+      institution, // Saving the institution value in the instituicaoNome column
+      accessRecovery,
+      access,
+    ];
+
     await connection.query(query, values);
     res.send({ success: true });
   } catch (err) {
@@ -103,6 +110,7 @@ app.post('/register', async (req, res) => {
     if (connection) connection.release();
   }
 });
+
 
 
 
