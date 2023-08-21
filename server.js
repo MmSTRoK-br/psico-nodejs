@@ -288,22 +288,33 @@ app.delete('/instituicoes/:id', async (req, res) => {
   const instituicaoId = req.params.id;
 
   try {
-    // Excluir a instituição da tabela Instituicoes
-    await connection.query(
-      'DELETE FROM Instituicoes WHERE id = ?',
-      [instituicaoId]
-    );
+    // Iniciar transação
+    await connection.beginTransaction();
 
-    // Excluir dados relacionados em outras tabelas (Contatos, Unidades, Setores, Cargos, Usuarios) se necessário
+    // Excluir dados relacionados em outras tabelas
+    await connection.query('DELETE FROM Contatos WHERE instituicaoId = ?', [instituicaoId]);
+    await connection.query('DELETE FROM Unidades WHERE instituicaoId = ?', [instituicaoId]);
+    await connection.query('DELETE FROM Setores WHERE instituicaoId = ?', [instituicaoId]);
+    await connection.query('DELETE FROM Cargos WHERE instituicaoId = ?', [instituicaoId]);
+    await connection.query('DELETE FROM Usuarios WHERE instituicaoId = ?', [instituicaoId]);
+
+    // Excluir a instituição da tabela Instituicoes
+    await connection.query('DELETE FROM Instituicoes WHERE id = ?', [instituicaoId]);
+
+    // Confirmar transação
+    await connection.commit();
 
     res.status(200).send('Instituição excluída com sucesso!');
   } catch (error) {
+    // Reverter transação em caso de erro
+    await connection.rollback();
     console.error(error);
     res.status(500).send('Erro ao excluir a instituição');
   } finally {
     connection.release();
   }
 });
+
 
 
 app.get('/instituicoes', async (req, res) => {
