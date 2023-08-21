@@ -283,21 +283,13 @@ app.put('/instituicoes/:id', async (req, res) => {
   }
 });
 
-app.delete('/instituicoes/:nome', async (req, res) => {
+app.delete('/instituicoes/:id', async (req, res) => {
   const connection = await pool.getConnection();
-  const instituicaoNome = req.params.nome; // Nome da instituição
+  const instituicaoId = req.params.id; // ID da instituição
 
   try {
     // Iniciar transação
     await connection.beginTransaction();
-
-    // Primeiro, obter o ID da instituição usando o nome
-    const [instituicaoData] = await connection.query('SELECT id FROM Instituicoes WHERE instituicao = ?', [instituicaoNome]);
-    const instituicaoId = instituicaoData[0]?.id;
-
-    if (!instituicaoId) {
-      throw new Error('Instituição não encontrada');
-    }
 
     // Excluir dados relacionados em outras tabelas usando instituicaoId
     await connection.query('DELETE FROM Contatos WHERE instituicaoId = ?', [instituicaoId]);
