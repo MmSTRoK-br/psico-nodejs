@@ -56,14 +56,13 @@ app.post('/register', async (req, res) => {
     unit,
     sector,
     role,
-    institution,
+    institution, // Extracting the institution field
     accessRecovery,
     access, 
-    institution,
   } = req.body;
 
   const query =
-    'INSERT INTO cadastro_clientes (name, surname, email, birthDate, gender, phone, phone2, cpf, cnpj, registration, obs, address, number, complement, district, city, state, country, zipCode, unit, sector, role, institution, accessRecovery, instituicaoNome) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+    'INSERT INTO cadastro_clientes (name, surname, email, birthDate, gender, phone, phone2, cpf, cnpj, registration, obs, address, number, complement, district, city, state, country, zipCode, unit, sector, role, institution, instituicaoNome, accessRecovery) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
   const values = [
     name,
     surname,
@@ -87,11 +86,10 @@ app.post('/register', async (req, res) => {
     unit,
     sector,
     role,
-    institution,
+    institution, // Saving the institution value in the institution column
+    institution, // Saving the institution value in the instituicaoNome column
     accessRecovery,
-    access, 
-    institution,
-
+    access,
   ];
 
   try {
@@ -103,8 +101,9 @@ app.post('/register', async (req, res) => {
     return res.send({ success: false, message: err.message });
   } finally {
     if (connection) connection.release();
-  }         
+  }
 });
+
 
 
 app.post('/login', async (req, res) => {
