@@ -335,7 +335,7 @@ app.get('/usuarios', async (req, res) => {
 
   try {
     // Modify the query to search users from the Cadastro_clientes table
-    const [usuarios] = await connection.query('SELECT * FROM Cadastro_clientes WHERE instituicaoNome = ?', [instituicaoNome]);
+    const [usuarios] = await connection.query('SELECT * FROM cadastro_clientes WHERE instituicaoNome = ?', [instituicaoNome]);
     res.status(200).json(usuarios);
   } catch (error) {
     console.error(error);
