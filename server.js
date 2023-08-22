@@ -443,6 +443,19 @@ app.get('/usuarios', async (req, res) => {
   }
 });
 
+app.get('/usuarios_instituicao', async (req, res) => {
+  try {
+    // Execute a query to fetch users from the Usuarios table
+    const [usuarios] = await connection.query('SELECT nome, identificador, senha FROM Usuarios');
+    
+    // Send the users as JSON response
+    res.status(200).json(usuarios);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Erro ao buscar usuários');
+  }
+});
+
 
 app.post('/register_usuario', async (req, res) => {
   const { usuario, nome, email, senha, unidade, setor, acesso } = req.body;
