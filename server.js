@@ -284,10 +284,14 @@ app.put('/instituicoes/:id', async (req, res) => {
 });
 
 app.delete('/instituicoes/:id', async (req, res) => {
+  console.log('Objeto completo de parâmetros:', req.params); // Log dos parâmetros
+
+  // Assumindo que o ID é extraído diretamente dos parâmetros (ajuste conforme necessário)
+  const instituicaoId = req.params.id;
+
+  console.log('ID da instituição:', instituicaoId); // Log do ID
+
   const connection = await pool.getConnection();
-  const instituicaoId = req.params.id; // ID da instituição
-  console.log('ID da instituição:', instituicaoId);
-  console.log('Objeto completo de parâmetros:', req.params);
 
   try {
     // Iniciar transação
@@ -323,6 +327,7 @@ app.delete('/instituicoes/:id', async (req, res) => {
     connection.release();
   }
 });
+
 
 
 
