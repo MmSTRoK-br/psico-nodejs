@@ -446,7 +446,7 @@ app.get('/usuarios', async (req, res) => {
 app.get('/usuarios_instituicao', async (req, res) => {
   try {
     // Execute a query to fetch users from the Usuarios table using the pool variable
-    const [usuarios] = await pool.query('SELECT nome, identificador, senha FROM Usuarios');
+    const [usuarios] = await pool.query('SELECT nome, identificador, senha, instituicaoNome, acesso FROM Usuarios');
     
     // Send the users as JSON response
     res.status(200).json(usuarios);
