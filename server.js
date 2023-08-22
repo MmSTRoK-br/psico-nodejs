@@ -286,6 +286,7 @@ app.put('/instituicoes/:id', async (req, res) => {
 app.delete('/instituicoes/:id', async (req, res) => {
   const connection = await pool.getConnection();
   const instituicaoId = req.params.id; // ID da instituição
+  console.log('ID da instituição:', instituicaoId);
 
   try {
     // Iniciar transação
