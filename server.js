@@ -291,19 +291,26 @@ app.delete('/instituicoes/:id', async (req, res) => {
     // Iniciar transação
     await connection.beginTransaction();
 
+    // Lista de tabelas relacionadas
+    const relatedTables = ['Contatos', 'Unidades', 'Setores', 'Cargos', 'Usuarios'];
+    
     // Excluir dados relacionados em outras tabelas usando instituicaoId
-    await connection.query('DELETE FROM Contatos WHERE instituicaoId = ?', [instituicaoId]);
-    await connection.query('DELETE FROM Unidades WHERE instituicaoId = ?', [instituicaoId]);
-    await connection.query('DELETE FROM Setores WHERE instituicaoId = ?', [instituicaoId]);
-    await connection.query('DELETE FROM Cargos WHERE instituicaoId = ?', [instituicaoId]);
-    await connection.query('DELETE FROM Usuarios WHERE instituicaoId = ?', [instituicaoId]);
+    for (const table of relatedTables) {
+      const [result] = await connection.query(`DELETE FROM ${table} WHERE instituicaoId = ?`, [instituicaoId]);
+      console.log(`Registros excluídos da tabela ${table}:`, result.affectedRows);
+      if (result.affectedRows === 0) {
+        console.warn(`Nenhum registro encontrado para exclusão na tabela ${table} para instituicaoId: ${instituicaoId}`);
+      }
+    }
 
     // Excluir a instituição da tabela Instituicoes usando o ID
-    await connection.query('DELETE FROM Instituicoes WHERE id = ?', [instituicaoId]);
+    const [deleteInstituicaoResult] = await connection.query('DELETE FROM Instituicoes WHERE id = ?', [instituicaoId]);
+    if (deleteInstituicaoResult.affectedRows === 0) {
+      throw new Error(`Instituição com ID ${instituicaoId} não encontrada`);
+    }
 
     // Confirmar transação
     await connection.commit();
-
     res.status(200).send('Instituição excluída com sucesso!');
   } catch (error) {
     // Reverter transação em caso de erro
@@ -314,6 +321,7 @@ app.delete('/instituicoes/:id', async (req, res) => {
     connection.release();
   }
 });
+
 
 
 
