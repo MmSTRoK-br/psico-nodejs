@@ -445,8 +445,8 @@ app.get('/usuarios', async (req, res) => {
 
 app.get('/usuarios_instituicao', async (req, res) => {
   try {
-    // Execute a query to fetch users from the Usuarios table
-    const [usuarios] = await connection.query('SELECT nome, identificador, senha FROM Usuarios');
+    // Execute a query to fetch users from the Usuarios table using the pool variable
+    const [usuarios] = await pool.query('SELECT nome, identificador, senha FROM Usuarios');
     
     // Send the users as JSON response
     res.status(200).json(usuarios);
@@ -455,6 +455,7 @@ app.get('/usuarios_instituicao', async (req, res) => {
     res.status(500).send('Erro ao buscar usuários');
   }
 });
+
 
 
 app.post('/register_usuario', async (req, res) => {
