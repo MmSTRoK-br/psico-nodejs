@@ -456,6 +456,22 @@ app.get('/usuarios_instituicao', async (req, res) => {
   }
 });
 
+app.post('/salvar-instituicao', async (req, res) => {
+  try {
+    // Extract the edited data from the request body
+    const { instituicoes, cargos, contatos, setores, unidades, usuarios } = req.body;
+
+    // Update the database with the edited data
+    // You will need to write the SQL queries to update the relevant tables
+    // ...
+
+    // Respond with success
+    res.status(200).json({ success: true });
+  } catch (error) {
+    console.error('Erro ao salvar as alterações:', error);
+    res.status(500).send('Erro ao salvar as alterações');
+  }
+});
 
 
 app.post('/register_usuario', async (req, res) => {
