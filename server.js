@@ -466,37 +466,44 @@ app.post('/salvar-instituicao', async (req, res) => {
 
     // Updating instituicoes
     const instituicoesData = instituicoes;
-    const instituicoesQuery = `UPDATE Instituicoes SET instituicao = ?, cnpj = ?, inscricaoEstadual = ?, razaoSocial = ?, logradouro = ?, numero = ?, complemento = ?, bairro = ?, cidade = ?, estado = ?, pais = ?, cep = ? WHERE id = ?;`;
+    const instituicoesQuery = `UPDATE Instituicoes SET instituicao = ?, cnpj = ?, razaoSocial = ?, logradouro = ?, numero = ?, complemento = ?, bairro = ?, cidade = ?, estado = ?, pais = ?, cep = ? WHERE id = ?;`;
     for (const item of instituicoesData) {
         await connection.execute(instituicoesQuery, Object.values(item));
     }
 
     // Updating cargos
     const cargosData = cargos;
-    const cargosQuery = `UPDATE Cargos SET cargo = ?, instituicaoNome = ? WHERE id = ? AND instituicaoId = ?;`;
+    const cargosQuery = `UPDATE Cargos SET cargo = ? WHERE id = ?;`;
     for (const item of cargosData) {
         await connection.execute(cargosQuery, Object.values(item));
     }
 
     // Updating contatos
     const contatosData = contatos;
-    const contatosQuery = `UPDATE Contatos SET categoria = ?, categoriaEspecifica = ?, nomeCompleto = ?, telefone = ?, instituicaoNome = ? WHERE id = ? AND instituicaoId = ?;`;
+    const contatosQuery = `UPDATE Contatos SET categoria = ?, categoriaEspecifica = ?, nomeCompleto = ?, telefone = ? WHERE id = ?;`;
     for (const item of contatosData) {
         await connection.execute(contatosQuery, Object.values(item));
     }
 
     // Updating setores
     const setoresData = setores;
-    const setoresQuery = `UPDATE Setores SET setor = ?, instituicaoNome = ? WHERE id = ? AND instituicaoId = ?;`;
+    const setoresQuery = `UPDATE Setores SET setor = ? WHERE id = ?;`;
     for (const item of setoresData) {
         await connection.execute(setoresQuery, Object.values(item));
     }
 
     // Updating unidades
     const unidadesData = unidades;
-    const unidadesQuery = `UPDATE Unidades SET unidade = ?, instituicaoNome = ? WHERE id = ? AND instituicaoId = ?;`;
+    const unidadesQuery = `UPDATE Unidades SET unidade = ? WHERE id = ?;`;
     for (const item of unidadesData) {
         await connection.execute(unidadesQuery, Object.values(item));
+    }
+
+    // Updating usuarios
+    const usuariosData = usuarios;
+    const usuariosQuery = `UPDATE Usuarios SET nome = ?, identificador = ?, senha = ?, acesso = ? WHERE id = ?;`;
+    for (const item of usuariosData) {
+        await connection.execute(usuariosQuery, Object.values(item));
     }
 
     // Release the connection
@@ -509,9 +516,6 @@ app.post('/salvar-instituicao', async (req, res) => {
     res.status(500).send('Erro ao salvar as alterações');
   }
 });
-
-
-
 
 app.post('/register_usuario', async (req, res) => {
   const { usuario, nome, email, senha, unidade, setor, acesso } = req.body;
