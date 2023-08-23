@@ -461,6 +461,8 @@ app.post('/salvar-instituicao', async (req, res) => {
     // Extract the edited data from the request body
     const { instituicoes, cargos, contatos, setores, unidades, usuarios } = req.body;
 
+
+    console.log('Received data:', req.body);
     // Get a connection from the pool
     const connection = await pool.getConnection();
 
