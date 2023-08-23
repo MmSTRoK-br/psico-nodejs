@@ -460,6 +460,8 @@ app.post('/salvar-instituicao', async (req, res) => {
   try {
     // Extract the edited data from the request body
     const { instituicoes, cargos, contatos, setores, unidades, usuarios } = req.body;
+    console.log('Received data:', req.body); // Log the received data
+
 
 
     console.log('Received data:', req.body);
