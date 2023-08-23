@@ -502,10 +502,11 @@ app.post('/salvar-instituicao', async (req, res) => {
     }
 
     // Updating usuarios
-    const usuariosData = usuarios;
     const usuariosQuery = `UPDATE Usuarios SET nome = ?, identificador = ?, senha = ?, acesso = ? WHERE id = ?;`;
+    const usuariosData = usuarios;
     for (const item of usuariosData) {
-        await connection.execute(usuariosQuery, Object.values(item));
+      const { nome, identificador, senha, acesso, id } = item;
+      await connection.execute(usuariosQuery, [nome, identificador, senha, acesso, id]);
     }
 
     // Release the connection
