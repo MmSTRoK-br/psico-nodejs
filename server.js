@@ -501,6 +501,9 @@ app.post('/salvar-instituicao', async (req, res) => {
         await connection.execute(unidadesQuery, Object.values(item));
     }
 
+    // Define the query for updating Usuarios
+    const usuariosQuery = `UPDATE Usuarios SET nome = ?, identificador = ?, senha = ?, acesso = ? WHERE id = ?;`;
+
     // Updating usuarios
     const usuariosData = usuarios;
     for (const item of usuariosData) {
@@ -512,7 +515,7 @@ app.post('/salvar-instituicao', async (req, res) => {
         console.error('One or more fields are undefined:', item);
         continue; // Skip to next item if something is undefined
       }
-    
+
       await connection.execute(usuariosQuery, [nome, identificador, senha, acesso, id]);
     }
     // Release the connection
