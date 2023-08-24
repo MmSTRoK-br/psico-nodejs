@@ -473,41 +473,41 @@ app.post('/salvar-instituicao', async (req, res) => {
 
     // Updating instituicoes
     const instituicoesData = instituicoes;
-    const instituicoesQuery = `UPDATE Instituicoes SET instituicao = ?, cnpj = ?, razaoSocial = ?, logradouro = ?, numero = ?, complemento = ?, bairro = ?, cidade = ?, estado = ?, pais = ?, cep = ? WHERE id = ?;`;
+    const instituicoesQuery = `UPDATE Instituicoes SET instituicao = ?, cnpj = ?, razaoSocial = ?, logradouro = ?, numero = ?, complemento = ?, bairro = ?, cidade = ?, estado = ?, pais = ?, cep = ? WHERE instituicaoId = ?;`;
     for (const item of instituicoesData) {
         await connection.execute(instituicoesQuery, Object.values(item));
     }
 
     // Updating cargos
     const cargosData = cargos;
-    const cargosQuery = `UPDATE Cargos SET cargo = ? WHERE id = ?;`;
+    const cargosQuery = `UPDATE Cargos SET cargo = ? WHERE instituicaoId = ?;`;
     for (const item of cargosData) {
         await connection.execute(cargosQuery, Object.values(item));
     }
 
     // Updating contatos
     const contatosData = contatos;
-    const contatosQuery = `UPDATE Contatos SET categoria = ?, categoriaEspecifica = ?, nomeCompleto = ?, telefone = ? WHERE id = ?;`;
+    const contatosQuery = `UPDATE Contatos SET categoria = ?, categoriaEspecifica = ?, nomeCompleto = ?, telefone = ? WHERE instituicaoId = ?;`;
     for (const item of contatosData) {
         await connection.execute(contatosQuery, Object.values(item));
     }
 
     // Updating setores
     const setoresData = setores;
-    const setoresQuery = `UPDATE Setores SET setor = ? WHERE id = ?;`;
+    const setoresQuery = `UPDATE Setores SET setor = ? WHERE instituicaoId = ?;`;
     for (const item of setoresData) {
         await connection.execute(setoresQuery, Object.values(item));
     }
 
     // Updating unidades
     const unidadesData = unidades;
-    const unidadesQuery = `UPDATE Unidades SET unidade = ? WHERE id = ?;`;
+    const unidadesQuery = `UPDATE Unidades SET unidade = ? WHERE instituicaoId = ?;`;
     for (const item of unidadesData) {
         await connection.execute(unidadesQuery, Object.values(item));
     }
 
     // Define the query for updating Usuarios (include instituicaoId if needed)
-    const usuariosQuery = `UPDATE Usuarios SET nome = ?, identificador = ?, senha = ?, acesso = ? WHERE id = ? AND instituicaoId = ?;`;
+    const usuariosQuery = `UPDATE Usuarios SET nome = ?, identificador = ?, senha = ?, acesso = ? WHERE instituicaoId = ?;`;
 
     // Updating usuarios
     const usuariosData = usuarios;
