@@ -473,7 +473,7 @@ app.post('/salvar-instituicao', async (req, res) => {
 
     // Updating instituicoes
     const instituicoesData = instituicoes;
-    const instituicoesQuery = `UPDATE Instituicoes SET instituicao = ?, cnpj = ?, razaoSocial = ?, logradouro = ?, numero = ?, complemento = ?, bairro = ?, cidade = ?, estado = ?, pais = ?, cep = ? WHERE instituicaoId = ?;`;
+    const instituicoesQuery = `UPDATE Instituicoes SET instituicao = ?, cnpj = ?, razaoSocial = ?, logradouro = ?, numero = ?, complemento = ?, bairro = ?, cidade = ?, estado = ?, pais = ?, cep = ? WHERE id = ?;`;
     for (const item of instituicoesData) {
         await connection.execute(instituicoesQuery, Object.values(item));
     }
