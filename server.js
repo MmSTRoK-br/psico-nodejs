@@ -444,17 +444,20 @@ app.get('/usuarios', async (req, res) => {
 });
 
 app.get('/usuarios_instituicao', async (req, res) => {
+  const instituicaoId = req.query.instituicaoId; // Obter o ID da instituição da query
+
   try {
-    // Execute a query to fetch users from the Usuarios table using the pool variable
-    const [usuarios] = await pool.query('SELECT nome, identificador, senha, acesso FROM Usuarios');
+    // Execute a query para buscar usuários da tabela Usuarios que correspondem ao ID da instituição
+    const [usuarios] = await pool.query('SELECT nome, identificador, senha, acesso FROM Usuarios WHERE instituicaoId = ?', [instituicaoId]);
     
-    // Send the users as JSON response
+    // Enviar os usuários como resposta JSON
     res.status(200).json(usuarios);
   } catch (error) {
     console.error(error);
     res.status(500).send('Erro ao buscar usuários');
   }
 });
+
 
 app.post('/salvar-instituicao', async (req, res) => {
   try {
