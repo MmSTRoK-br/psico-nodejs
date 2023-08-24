@@ -485,6 +485,8 @@ app.post('/salvar-instituicao', async (req, res) => {
     const instituicoesQuery = `UPDATE Instituicoes SET instituicao = ?, cnpj = ?, inscricaoEstadual = ?, razaoSocial = ?, logradouro = ?, numero = ?, complemento = ?, bairro = ?, cidade = ?, estado = ?, pais = ?, cep = ? WHERE id = ?;`;
     await connection.execute(instituicoesQuery, instituicoesValues);
 
+    console.log('Instituicoes data:', instituicoesData);
+
     // Updating cargos, contatos, setores, and unidades
     const tables = { cargos, contatos, setores, unidades };
     for (const [table, data] of Object.entries(tables)) {
