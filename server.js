@@ -461,65 +461,44 @@ app.get('/usuarios_instituicao', async (req, res) => {
 
 app.post('/salvar-instituicao', async (req, res) => {
   try {
-    // Extract the edited data from the request body
     const { instituicoes, cargos, contatos, setores, unidades, usuarios } = req.body;
     console.log('Received data:', req.body);
 
-    // Get a connection from the pool
     const connection = await pool.getConnection();
-    await connection.beginTransaction(); // Iniciar a transação
 
     // Updating instituicoes
+    const instituicoesData = instituicoes;
     const instituicoesQuery = `UPDATE Instituicoes SET instituicao = ?, cnpj = ?, inscricaoEstadual = ?, razaoSocial = ?, logradouro = ?, numero = ?, complemento = ?, bairro = ?, cidade = ?, estado = ?, pais = ?, cep = ? WHERE id = ?;`;
-    for (const item of instituicoes) {
-      await connection.execute(instituicoesQuery, Object.values(item));
+    const instituicaoId = await connection.execute(instituicoesQuery, Object.values(instituicoesData[0]));
+
+    // Updating cargos, contatos, setores, and unidades
+    const tables = { cargos, contatos, setores, unidades };
+    for (const [table, data] of Object.entries(tables)) {
+      const query = `UPDATE ${table.charAt(0).toUpperCase() + table.slice(1)} SET ${table.slice(0, -1)} = ? WHERE instituicaoId = ?;`;
+      for (const item of data) {
+        await connection.execute(query, [item[table.slice(0, -1)], instituicaoId]);
+      }
     }
 
-    // Updating cargos
-    const cargosQuery = `UPDATE Cargos SET cargo = ? WHERE instituicaoId = ?;`;
-    for (const item of cargos) {
-      await connection.execute(cargosQuery, Object.values(item));
-    }
-
-    // Updating contatos
-    const contatosQuery = `UPDATE Contatos SET categoria = ?, categoriaEspecifica = ?, nomeCompleto = ?, telefone = ? WHERE instituicaoId = ?;`;
-    for (const item of contatos) {
-      await connection.execute(contatosQuery, Object.values(item));
-    }
-
-    // Updating setores
-    const setoresQuery = `UPDATE Setores SET setor = ? WHERE instituicaoId = ?;`;
-    for (const item of setores) {
-      await connection.execute(setoresQuery, Object.values(item));
-    }
-
-    // Updating unidades
-    const unidadesQuery = `UPDATE Unidades SET unidade = ? WHERE instituicaoId = ?;`;
-    for (const item of unidades) {
-      await connection.execute(unidadesQuery, Object.values(item));
-    }
+    // Define the query for updating Usuarios
+    const usuariosQuery = `UPDATE Usuarios SET nome = ?, identificador = ?, senha = ?, acesso = ? WHERE id = ?;`;
 
     // Updating usuarios
-    const usuariosQuery = `UPDATE Usuarios SET nome = ?, identificador = ?, senha = ?, acesso = ? WHERE instituicaoId = ?;`;
     for (const item of usuarios) {
-      const { nome, identificador, senha, acesso, instituicaoId } = item;
-      if ([nome, identificador, senha, acesso, instituicaoId].includes(undefined)) {
+      console.log('Updating user:', item);
+      const { nome, identificador, senha, acesso, id } = item;
+
+      if ([nome, identificador, senha, acesso, id].includes(undefined)) {
         console.error('One or more fields are undefined:', item);
         continue;
       }
-      await connection.execute(usuariosQuery, [nome, identificador, senha, acesso, instituicaoId]);
+
+      await connection.execute(usuariosQuery, [nome, identificador, senha, acesso, id]);
     }
 
-    await connection.commit(); // Confirmar a transação
     connection.release();
-
-    // Respond with success
     res.status(200).json({ success: true });
   } catch (error) {
-    if (connection) {
-      await connection.rollback(); // Reverter a transação
-      connection.release();
-    }
     console.error('Erro ao salvar as alterações:', error);
     res.status(500).send('Erro ao salvar as alterações');
   }
