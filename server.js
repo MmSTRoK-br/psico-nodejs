@@ -465,11 +465,25 @@ app.post('/salvar-instituicao', async (req, res) => {
     console.log('Received data:', req.body);
 
     const connection = await pool.getConnection();
-
     // Updating instituicoes
-    const instituicoesData = instituicoes;
+    const instituicoesData = instituicoes[0]; // Get the first object from the array
+    const instituicoesValues = [
+      instituicoesData.instituicao,
+      instituicoesData.cnpj,
+      instituicoesData.inscricaoEstadual,
+      instituicoesData.razaoSocial,
+      instituicoesData.logradouro,
+      instituicoesData.numero,
+      instituicoesData.complemento,
+      instituicoesData.bairro,
+      instituicoesData.cidade,
+      instituicoesData.estado,
+      instituicoesData.pais,
+      instituicoesData.cep,
+      instituicoesData.id // Assuming the ID is provided in the data
+    ];
     const instituicoesQuery = `UPDATE Instituicoes SET instituicao = ?, cnpj = ?, inscricaoEstadual = ?, razaoSocial = ?, logradouro = ?, numero = ?, complemento = ?, bairro = ?, cidade = ?, estado = ?, pais = ?, cep = ? WHERE id = ?;`;
-    const instituicaoId = await connection.execute(instituicoesQuery, Object.values(instituicoesData[0]));
+    await connection.execute(instituicoesQuery, instituicoesValues);
 
     // Updating cargos, contatos, setores, and unidades
     const tables = { cargos, contatos, setores, unidades };
