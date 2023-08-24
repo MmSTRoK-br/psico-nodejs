@@ -503,22 +503,22 @@ app.post('/salvar-instituicao', async (req, res) => {
         await connection.execute(unidadesQuery, Object.values(item));
     }
 
-    // Define the query for updating Usuarios
-    const usuariosQuery = `UPDATE Usuarios SET nome = ?, identificador = ?, senha = ?, acesso = ? WHERE id = ?;`;
+    // Define the query for updating Usuarios (include instituicaoId if needed)
+    const usuariosQuery = `UPDATE Usuarios SET nome = ?, identificador = ?, senha = ?, acesso = ? WHERE id = ? AND instituicaoId = ?;`;
 
     // Updating usuarios
     const usuariosData = usuarios;
     for (const item of usuariosData) {
       console.log('Updating user:', item); // Log the item
-      const { nome, identificador, senha, acesso, id } = item;
+      const { nome, identificador, senha, acesso, id, instituicaoId } = item;
       
       // Check if any field is undefined
-      if ([nome, identificador, senha, acesso, id].includes(undefined)) {
+      if ([nome, identificador, senha, acesso, id, instituicaoId].includes(undefined)) {
         console.error('One or more fields are undefined:', item);
         continue; // Skip to next item if something is undefined
       }
 
-      await connection.execute(usuariosQuery, [nome, identificador, senha, acesso, id]);
+      await connection.execute(usuariosQuery, [nome, identificador, senha, acesso, id, instituicaoId]);
     }
     // Release the connection
     connection.release();
