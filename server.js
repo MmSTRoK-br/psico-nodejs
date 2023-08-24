@@ -463,76 +463,68 @@ app.post('/salvar-instituicao', async (req, res) => {
   try {
     // Extract the edited data from the request body
     const { instituicoes, cargos, contatos, setores, unidades, usuarios } = req.body;
-    console.log('Received data:', req.body); // Log the received data
-
-
-
     console.log('Received data:', req.body);
+
     // Get a connection from the pool
     const connection = await pool.getConnection();
+    await connection.beginTransaction(); // Iniciar a transação
 
     // Updating instituicoes
-    const instituicoesData = instituicoes;
-    const instituicoesQuery = `UPDATE Instituicoes SET instituicao = ?, cnpj = ?, razaoSocial = ?, logradouro = ?, numero = ?, complemento = ?, bairro = ?, cidade = ?, estado = ?, pais = ?, cep = ? WHERE id = ?;`;
-    for (const item of instituicoesData) {
-        await connection.execute(instituicoesQuery, Object.values(item));
+    const instituicoesQuery = `UPDATE Instituicoes SET instituicao = ?, cnpj = ?, inscricaoEstadual = ?, razaoSocial = ?, logradouro = ?, numero = ?, complemento = ?, bairro = ?, cidade = ?, estado = ?, pais = ?, cep = ? WHERE id = ?;`;
+    for (const item of instituicoes) {
+      await connection.execute(instituicoesQuery, Object.values(item));
     }
 
     // Updating cargos
-    const cargosData = cargos;
     const cargosQuery = `UPDATE Cargos SET cargo = ? WHERE instituicaoId = ?;`;
-    for (const item of cargosData) {
-        await connection.execute(cargosQuery, Object.values(item));
+    for (const item of cargos) {
+      await connection.execute(cargosQuery, Object.values(item));
     }
 
     // Updating contatos
-    const contatosData = contatos;
     const contatosQuery = `UPDATE Contatos SET categoria = ?, categoriaEspecifica = ?, nomeCompleto = ?, telefone = ? WHERE instituicaoId = ?;`;
-    for (const item of contatosData) {
-        await connection.execute(contatosQuery, Object.values(item));
+    for (const item of contatos) {
+      await connection.execute(contatosQuery, Object.values(item));
     }
 
     // Updating setores
-    const setoresData = setores;
     const setoresQuery = `UPDATE Setores SET setor = ? WHERE instituicaoId = ?;`;
-    for (const item of setoresData) {
-        await connection.execute(setoresQuery, Object.values(item));
+    for (const item of setores) {
+      await connection.execute(setoresQuery, Object.values(item));
     }
 
     // Updating unidades
-    const unidadesData = unidades;
     const unidadesQuery = `UPDATE Unidades SET unidade = ? WHERE instituicaoId = ?;`;
-    for (const item of unidadesData) {
-        await connection.execute(unidadesQuery, Object.values(item));
+    for (const item of unidades) {
+      await connection.execute(unidadesQuery, Object.values(item));
     }
-
-    // Define the query for updating Usuarios (include instituicaoId if needed)
-    const usuariosQuery = `UPDATE Usuarios SET nome = ?, identificador = ?, senha = ?, acesso = ? WHERE instituicaoId = ?;`;
 
     // Updating usuarios
-    const usuariosData = usuarios;
-    for (const item of usuariosData) {
-      console.log('Updating user:', item); // Log the item
-      const { nome, identificador, senha, acesso, id, instituicaoId } = item;
-      
-      // Check if any field is undefined
-      if ([nome, identificador, senha, acesso, id, instituicaoId].includes(undefined)) {
+    const usuariosQuery = `UPDATE Usuarios SET nome = ?, identificador = ?, senha = ?, acesso = ? WHERE instituicaoId = ?;`;
+    for (const item of usuarios) {
+      const { nome, identificador, senha, acesso, instituicaoId } = item;
+      if ([nome, identificador, senha, acesso, instituicaoId].includes(undefined)) {
         console.error('One or more fields are undefined:', item);
-        continue; // Skip to next item if something is undefined
+        continue;
       }
-
-      await connection.execute(usuariosQuery, [nome, identificador, senha, acesso, id, instituicaoId]);
+      await connection.execute(usuariosQuery, [nome, identificador, senha, acesso, instituicaoId]);
     }
-    // Release the connection
+
+    await connection.commit(); // Confirmar a transação
     connection.release();
 
     // Respond with success
     res.status(200).json({ success: true });
   } catch (error) {
+    if (connection) {
+      await connection.rollback(); // Reverter a transação
+      connection.release();
+    }
     console.error('Erro ao salvar as alterações:', error);
     res.status(500).send('Erro ao salvar as alterações');
   }
 });
+
 
 app.post('/register_usuario', async (req, res) => {
   const { usuario, nome, email, senha, unidade, setor, acesso } = req.body;
