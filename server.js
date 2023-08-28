@@ -736,16 +736,34 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get('/usercount', async (req, res) => {
+app.get('/api/UserCountByInstitution', async (req, res) => {
+  const institutionName = req.query.instituicaoNome;
+
   try {
-      const [rows] = await pool.query('SELECT COUNT(*) as count FROM cadastro_clientes');
-      res.json({ count: rows[0].count });
+    // Crie uma conexão com o banco de dados
+    const connection = await mysql.createConnection({
+      host: process.env.DB_HOST,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME
+    });
+
+    // Consulta SQL para contar os usuários com o mesmo nome de instituição
+    const [rows] = await connection.execute(
+      "SELECT COUNT(*) AS count FROM Usuarios WHERE instituicaoNome = ?",
+      [institutionName]
+    );
+
+    // Fechar a conexão
+    await connection.end();
+
+    // Enviar a contagem como resposta
+    res.json({ count: rows[0].count });
   } catch (error) {
-      console.error(error);
-      res.status(500).send('Erro ao buscar contagem de usuários.');
+    console.error('Erro ao contar usuários:', error);
+    res.status(500).send('Erro interno do servidor');
   }
 });
-
 
 // 1. Obter todos os usuários
 app.get('/usuarios', async (req, res) => {
