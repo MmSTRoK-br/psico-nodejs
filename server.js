@@ -579,6 +579,12 @@ app.post("/api/user/login", async (req, res) => {
       // Gerar um token JWT (ou outro mecanismo de autenticação)
       const token = jwt.sign({ userId: user.id }, jwtSecret, { expiresIn: '1h' });
 
+      // Registrar o evento de login na tabela de auditoria
+      await pool.execute(
+        "INSERT INTO Auditoria (username, instituicaoNome, action) VALUES (?, ?, 'Login')",
+        [user.name, user.institution]  // Substitua pelos campos corretos, se necessário
+      );
+
       res.json({
         success: true,
         message: 'Login bem-sucedido!',
@@ -595,6 +601,42 @@ app.post("/api/user/login", async (req, res) => {
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+app.post('/api/recordLogout', async (req, res) => {
+  const { username, instituicaoNome } = req.body;
+
+  try {
+    const connection = await pool.getConnection();
+    await connection.execute(
+      "INSERT INTO Auditoria (username, instituicaoNome, action) VALUES (?, ?, 'Logout')",
+      [username, instituicaoNome]
+    );
+    connection.release();
+
+    res.json({ message: 'Logout registrado com sucesso.' });
+  } catch (error) {
+    console.error('Erro ao registrar o logout:', error);
+    res.status(500).send('Erro interno do servidor');
+  }
+});
+
+app.get('/api/AuditEventsByInstitution', async (req, res) => {
+  const institutionName = req.query.instituicaoNome;
+
+  try {
+    const connection = await pool.getConnection();
+    const [rows] = await connection.execute(
+      "SELECT * FROM Auditoria WHERE instituicaoNome = ? ORDER BY timestamp DESC",
+      [institutionName]
+    );
+    connection.release();
+
+    res.json({ auditEvents: rows });
+  } catch (error) {
+    console.error('Erro ao buscar eventos de auditoria:', error);
+    res.status(500).send('Erro interno do servidor');
   }
 });
 
@@ -762,6 +804,7 @@ app.get('/api/UserCountByInstitution', async (req, res) => {
 });
 
 
+
 // 1. Obter todos os usuários
 app.get('/usuarios', async (req, res) => {
   try {
@@ -770,6 +813,24 @@ app.get('/usuarios', async (req, res) => {
   } catch (error) {
       console.error(error);
       res.status(500).send('Erro ao buscar usuários.');
+  }
+});
+
+app.post('/api/RegisterUserActivity', async (req, res) => {
+  const { userID, activityType, activityData } = req.body;
+  const timestamp = new Date();
+
+  try {
+    const connection = await pool.getConnection();
+    await connection.execute(
+      "INSERT INTO UserActivity (userID, activityType, activityData, timestamp) VALUES (?, ?, ?, ?)",
+      [userID, activityType, activityData, timestamp]
+    );
+    connection.release();
+    res.status(200).send('Atividade registrada com sucesso');
+  } catch (error) {
+    console.error('Erro ao registrar atividade:', error);
+    res.status(500).send('Erro interno do servidor');
   }
 });
 
