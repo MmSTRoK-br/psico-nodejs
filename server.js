@@ -808,11 +808,15 @@ app.get('/api/UserCountByInstitution', async (req, res) => {
 // 1. Obter todos os usuários
 app.get('/usuarios', async (req, res) => {
   try {
-      const [rows] = await pool.query('SELECT * FROM cadastro_clientes');
-      res.json(rows);
+    const instituicaoNome = req.query.instituicaoNome; // Pegar o parâmetro da URL
+    const query = instituicaoNome ?
+      `SELECT * FROM cadastro_clientes WHERE instituicaoNome = ?` :
+      `SELECT * FROM cadastro_clientes`;
+    const [rows] = await pool.query(query, [instituicaoNome]);
+    res.json(rows);
   } catch (error) {
-      console.error(error);
-      res.status(500).send('Erro ao buscar usuários.');
+    console.error(error);
+    res.status(500).send('Erro ao buscar usuários.');
   }
 });
 
