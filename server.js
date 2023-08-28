@@ -736,17 +736,13 @@ app.use((req, res, next) => {
   next();
 });
 
+// Nova rota para obter a contagem de usuários por instituição
 app.get('/api/UserCountByInstitution', async (req, res) => {
   const institutionName = req.query.instituicaoNome;
 
   try {
-    // Crie uma conexão com o banco de dados
-    const connection = await mysql.createConnection({
-      host: process.env.DB_HOST,
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME
-    });
+    // Obter uma conexão do pool
+    const connection = await pool.getConnection();
 
     // Consulta SQL para contar os usuários com o mesmo nome de instituição
     const [rows] = await connection.execute(
@@ -754,8 +750,8 @@ app.get('/api/UserCountByInstitution', async (req, res) => {
       [institutionName]
     );
 
-    // Fechar a conexão
-    await connection.end();
+    // Liberar a conexão de volta para o pool
+    connection.release();
 
     // Enviar a contagem como resposta
     res.json({ count: rows[0].count });
@@ -764,6 +760,7 @@ app.get('/api/UserCountByInstitution', async (req, res) => {
     res.status(500).send('Erro interno do servidor');
   }
 });
+
 
 // 1. Obter todos os usuários
 app.get('/usuarios', async (req, res) => {
