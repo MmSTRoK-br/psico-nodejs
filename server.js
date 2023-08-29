@@ -96,6 +96,7 @@ app.post('/register', async (req, res) => {
       Setor,
       Cargo,
       Instituicao,
+      Instituicao,
       Recuperacao_de_Acesso,
       Acesso,
     ];
