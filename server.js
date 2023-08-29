@@ -689,7 +689,7 @@ app.post('/api/verifyUser', async (req, res) => {
   const { name, email } = req.body;
   try {
     const [rows] = await pool.execute(
-      'SELECT * FROM cadastro_clientes WHERE name = ? AND email = ?',
+      'SELECT * FROM cadastro_clientes WHERE  Nome = ? AND Email = ?',
       [name, email]
     );
     if (rows.length > 0) {
@@ -706,7 +706,7 @@ app.post('/api/registerPassword', async (req, res) => {
   const { name, email, senha } = req.body;
   try {
     await pool.execute(
-      'UPDATE cadastro_clientes SET senha = ? WHERE name = ? AND email = ?',
+      'UPDATE cadastro_clientes SET senha = ? WHERE Nome = ? AND Email = ?',
       [senha, name, email]
     );
     res.json({ success: true });
