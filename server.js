@@ -689,11 +689,11 @@ app.post('/api/login', async (req, res) => {
 });
 
 app.post('/api/verifyUser', async (req, res) => {
-  const { name, email } = req.body;
+  const { Nome, Email } = req.body;
   try {
     const [rows] = await pool.execute(
       'SELECT * FROM cadastro_clientes WHERE  Nome = ? AND Email = ?',
-      [name, email]
+      [Nome, Email]
     );
     if (rows.length > 0) {
       res.json({ success: true });
@@ -706,11 +706,11 @@ app.post('/api/verifyUser', async (req, res) => {
 });
 
 app.post('/api/registerPassword', async (req, res) => {
-  const { name, email, senha } = req.body;
+  const { Nome, Email, Senha } = req.body;
   try {
     await pool.execute(
       'UPDATE cadastro_clientes SET senha = ? WHERE Nome = ? AND Email = ?',
-      [senha, name, email]
+      [Senha, Nome, Email]
     );
     res.json({ success: true });
   } catch (error) {
