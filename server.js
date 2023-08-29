@@ -71,7 +71,7 @@ app.post('/register', async (req, res) => {
     }
 
     const query =
-      'INSERT INTO cadastro_clientes (Nome, Sobrenome, Email, Data_de_Nascimento, Genero, Telefone, Telefone2, CPF, CNPJ, Matricula, Observacoes, Endereco, Numero, Complemento, Bairro, Cidade, Estado, Pais, CEP, Unidade, Setor, Cargo, Instituicao, instituicaoNome, Recuperacao_de_Acesso) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+      'INSERT INTO cadastro_clientes (Nome, Sobrenome, Email, Data_de_Nascimento, Genero, Telefone, Telefone2, CPF, CNPJ, Matricula, Observacoes, Endereco, Numero, Complemento, Bairro, Cidade, Estado, Pais, CEP, Unidade, Setor, Cargo, Instituicao, instituicaoNome, Acesso) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
     const values = [
       Nome,
       Sobrenome,
@@ -874,8 +874,9 @@ app.put('/cadastro_clientes/:id', async (req, res) => {
               Setor = ?,
               Cargo = ?,
               Instituicao = ?,
-              Recuperacao_de_Acesso = ?,
               Acesso = ?
+          WHERE id = ?
+
           WHERE id = ?
       `;
 
