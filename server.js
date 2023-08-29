@@ -98,12 +98,15 @@ app.post('/register', async (req, res) => {
       Instituicao,
       Acesso,
     ];
-  } catch (err) {
-    console.log(err);
-    return res.send({ success: false, message: err.message });
-  } finally {
-    if (connection) connection.release();
-  }
+    await connection.query(query, values);
+    return res.send({ success: true, message: 'Usuário registrado com sucesso.' });
+    
+    } catch (err) {
+        console.log(err);
+        return res.send({ success: false, message: err.message });
+    } finally {
+        if (connection) connection.release();
+    }
 });
 
 
