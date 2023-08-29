@@ -57,7 +57,6 @@ app.post('/register', async (req, res) => {
     Setor,
     Cargo,
     Instituicao,
-    Recuperacao_de_Acesso,
     Acesso,
   } = req.body;
 
@@ -839,7 +838,7 @@ app.put('/cadastro_clientes/:id', async (req, res) => {
   const {
       Nome, Sobrenome, Email, Data_de_Nascimento, Genero, Telefone, Telefone2, CPF, CNPJ,
       Matricula, Observacoes, Endereco, Numero, Complemento, Bairro, Cidade, Estado,
-      Pais, CEP, Unidade, Setor, Cargo, Instituicao, Recuperacao_de_Acesso, Acesso
+      Pais, CEP, Unidade, Setor, Cargo, Instituicao, Acesso
   } = req.body;
 
   try {
@@ -879,7 +878,7 @@ app.put('/cadastro_clientes/:id', async (req, res) => {
       await connection.query(query, [
           Nome, Sobrenome, Email, Data_de_Nascimento, Genero, Telefone, Telefone2, CPF, CNPJ,
           Matricula, Observacoes, Endereco, Numero, Complemento, Bairro, Cidade, Estado,
-          Pais, CEP, Unidade, Setor, Cargo, Instituicao, Recuperacao_de_Acesso, Acesso,
+          Pais, CEP, Unidade, Setor, Cargo, Instituicao, Acesso,
           id
       ]);
 
