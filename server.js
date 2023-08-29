@@ -841,9 +841,9 @@ app.post('/api/RegisterUserActivity', async (req, res) => {
 app.put('/cadastro_clientes/:id', async (req, res) => {
   const id = req.params.id;
   const {
-      name, surname, email, birthDate, gender, phone, phone2, cpf, cnpj,
-      registration, obs, address, number, complement, district, city, state,
-      country, zipCode, unit, sector, role, institution, accessRecovery, access
+      Nome, Sobrenome, Email, Data_de_Nascimento, Genero, Telefone, Telefone2, CPF, CNPJ,
+      Matricula, Observacoes, Endereco, Numero, Complemento, Bairro, Cidade, Estado,
+      Pais, CEP, Unidade, Setor, Cargo, Instituicao, Recuperacao_de_Acesso, Acesso
   } = req.body;
 
   try {
@@ -880,9 +880,9 @@ app.put('/cadastro_clientes/:id', async (req, res) => {
       `;
 
       await connection.query(query, [
-          name, surname, email, birthDate, gender, phone, phone2, cpf, cnpj,
-          registration, obs, address, number, complement, district, city, state,
-          country, zipCode, unit, sector, role, institution, accessRecovery, access,
+          Nome, Sobrenome, Email, Data_de_Nascimento, Genero, Telefone, Telefone2, CPF, CNPJ,
+          Matricula, Observacoes, Endereco, Numero, Complemento, Bairro, Cidade, Estado,
+          Pais, CEP, Unidade, Setor, Cargo, Instituicao, Recuperacao_de_Acesso, Acesso,
           id
       ]);
 
