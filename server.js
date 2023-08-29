@@ -97,12 +97,8 @@ app.post('/register', async (req, res) => {
       Cargo,
       Instituicao,
       Instituicao,
-      Recuperacao_de_Acesso,
       Acesso,
     ];
-
-    await connection.query(query, values);
-    res.send({ success: true });
   } catch (err) {
     console.log(err);
     return res.send({ success: false, message: err.message });
