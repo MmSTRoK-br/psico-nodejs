@@ -706,11 +706,11 @@ app.post('/api/verifyUser', async (req, res) => {
 });
 
 app.post('/api/registerPassword', async (req, res) => {
-  const { Nome, Email, Senha } = req.body;
+  const { Nome, Email, senha } = req.body;
   try {
     await pool.execute(
       'UPDATE cadastro_clientes SET senha = ? WHERE Nome = ? AND Email = ?',
-      [Senha, Nome, Email]
+      [senha, Nome, Email]
     );
     res.json({ success: true });
   } catch (error) {
