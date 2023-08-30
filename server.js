@@ -566,6 +566,15 @@ app.delete('/deleteAllUsers', async (req, res) => {
 app.post("/api/user/login", async (req, res) => {
   const { Email, senha } = req.body;
 
+  // Verifique se os parâmetros estão definidos
+  if (!Email || !senha) {
+    console.log('Dados incompletos recebidos.');  // Log de diagnóstico
+    return res.status(400).json({ success: false, message: 'Dados incompletos.' });
+  }
+  
+  // Log de diagnóstico para imprimir os valores recebidos
+  console.log(`Valores recebidos: Email = ${Email}, senha = ${senha}`);
+
   // Query para encontrar o usuário com o e-mail e a senha fornecidos
   const query = "SELECT * FROM cadastro_clientes WHERE Email = ? AND senha = ?";
 
@@ -601,6 +610,7 @@ app.post("/api/user/login", async (req, res) => {
     return res.status(500).json({ error: "Internal Server Error" });
   }
 });
+
 
 app.post('/api/recordLogout', async (req, res) => {
   const { username, instituicaoNome } = req.body;
