@@ -564,13 +564,13 @@ app.delete('/deleteAllUsers', async (req, res) => {
 // In server.js
 
 app.post("/api/user/login", async (req, res) => {
-  const { email, senha } = req.body;
+  const { Email, senha } = req.body;
 
   // Query para encontrar o usuário com o e-mail e a senha fornecidos
-  const query = "SELECT * FROM cadastro_clientes WHERE email = ? AND senha = ?";
+  const query = "SELECT * FROM cadastro_clientes WHERE Email = ? AND senha = ?";
 
   try {
-    const [results] = await pool.execute(query, [email, senha]);
+    const [results] = await pool.execute(query, [Email, senha]);
     if (results.length > 0) {
       const user = results[0];
 
