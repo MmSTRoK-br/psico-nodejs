@@ -430,8 +430,10 @@ app.get('/usuarios', async (req, res) => {
   const instituicaoNome = req.query.instituicaoNome;
 
   try {
-    // Modify the query to search users from the Cadastro_clientes table
-    const [usuarios] = await connection.query('SELECT * FROM cadastro_clientes WHERE instituicaoNome = ?', [instituicaoNome]);
+    const query = instituicaoNome ?
+      'SELECT * FROM cadastro_clientes WHERE instituicaoNome = ?' :
+      'SELECT * FROM cadastro_clientes';
+    const [usuarios] = await connection.query(query, [instituicaoNome]);
     res.status(200).json(usuarios);
   } catch (error) {
     console.error(error);
@@ -440,6 +442,7 @@ app.get('/usuarios', async (req, res) => {
     connection.release();
   }
 });
+
 
 app.get('/usuarios_instituicao', async (req, res) => {
   const instituicaoId = req.query.instituicaoId; // Obter o ID da instituição da query
@@ -811,22 +814,6 @@ app.get('/api/UserCountByInstitution', async (req, res) => {
   }
 });
 
-
-
-// 1. Obter todos os usuários
-app.get('/usuarios', async (req, res) => {
-  try {
-    const instituicaoNome = req.query.instituicaoNome; // Pegar o parâmetro da URL
-    const query = instituicaoNome ?
-      `SELECT * FROM cadastro_clientes WHERE instituicaoNome = ?` :
-      `SELECT * FROM cadastro_clientes`;
-    const [rows] = await pool.query(query, [instituicaoNome]);
-    res.json(rows);
-  } catch (error) {
-    console.error(error);
-    res.status(500).send('Erro ao buscar usuários.');
-  }
-});
 
 app.post('/api/RegisterUserActivity', async (req, res) => {
   const { userID, activityType, activityData } = req.body;
