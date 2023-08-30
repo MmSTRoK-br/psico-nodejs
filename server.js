@@ -706,15 +706,20 @@ app.post('/api/verifyUser', async (req, res) => {
 });
 
 app.post('/api/registerPassword', async (req, res) => {
-  const { Nome, Email, Senha } = req.body;  // Note que 'senha' foi mudado para 'Senha'
+  const { Nome, Email, Senha } = req.body;
+  
+  if (!Nome || !Email || !Senha) {
+    return res.status(400).json({ success: false, message: 'Dados incompletos.' });
+  }
+  
   try {
     await pool.execute(
       'UPDATE cadastro_clientes SET senha = ? WHERE Nome = ? AND Email = ?',
-      [Senha, Nome, Email]  // 'senha' foi mudado para 'Senha'
+      [Senha, Nome, Email]
     );
     res.json({ success: true });
   } catch (error) {
-    console.error("Erro no servidor: ", error);  // Log de diagnóstico
+    console.error("Erro no servidor: ", error);
     res.status(500).json({ success: false, message: 'Erro ao cadastrar senha' });
   }
 });
