@@ -586,21 +586,15 @@ app.post("/api/user/login", async (req, res) => {
       // Gerar um token JWT (ou outro mecanismo de autenticação)
       const token = jwt.sign({ userId: user.id }, jwtSecret, { expiresIn: '1h' });
 
-      // Registrar o evento de login na tabela de auditoria
-      await pool.execute(
-        "INSERT INTO Auditoria (username, instituicaoNome, action) VALUES (?, ?, 'Login')",
-        [user.name, user.institution]  // Substitua pelos campos corretos, se necessário
-      );
-
       res.json({
         success: true,
         message: 'Login bem-sucedido!',
         token: token,
-        username: user.name, // Supondo que o nome do usuário está na coluna 'nome'
-        institution: user.institution,
+        username: user.Nome,  // Supondo que o nome do usuário está na coluna 'Nome'
+        institution: user.instituicaoNome,
         role: 'Visualizador',
-        birthDate: user.birthDate,
-        cpf: user.cpf
+        birthDate: user.Data_de_Nascimento,
+        cpf: user.CPF
       });
     } else {
       res.status(401).json({ success: false, message: 'Credenciais inválidas!' });
