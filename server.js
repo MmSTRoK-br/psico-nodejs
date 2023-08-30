@@ -714,6 +714,7 @@ app.post('/api/registerPassword', async (req, res) => {
     );
     res.json({ success: true });
   } catch (error) {
+    console.error("Erro no servidor: ", error);  // Log de diagnóstico
     res.status(500).json({ success: false, message: 'Erro ao cadastrar senha' });
   }
 });
