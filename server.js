@@ -693,14 +693,29 @@ app.put('/programas/:id', async (req, res) => {
   }
 });
 
+app.put('/programas/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { nome_programa, link_form } = req.body;
+    const connection = await pool.getConnection();
+    const [result] = await connection.query(
+      'UPDATE programas SET nome_programa = ?, link_form = ? WHERE id = ?',
+      [nome_programa, link_form, id]
+    );
+    connection.release();
+    res.json({ success: true, message: 'Programa atualizado com sucesso!' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Erro ao atualizar programa' });
+  }
+});
+
+
 app.delete('/programas/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const connection = await pool.getConnection();
-    const [result] = await connection.query(
-      'DELETE FROM programas WHERE id = ?',
-      [id]
-    );
+    const [result] = await connection.query('DELETE FROM programas WHERE id = ?', [id]);
     connection.release();
     res.json({ success: true, message: 'Programa excluído com sucesso!' });
   } catch (error) {
@@ -709,23 +724,6 @@ app.delete('/programas/:id', async (req, res) => {
   }
 });
 
-
-app.post('/api/login', async (req, res) => {
-  const { usuario, senha } = req.body;
-  try {
-    const [rows] = await pool.execute(
-      'SELECT * FROM cadastro_clientes WHERE email AND senha = ?',
-      [usuario, usuario, senha]
-    );
-    if (rows.length > 0) {
-      res.json({ success: true });
-    } else {
-      res.json({ success: false });
-    }
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'Erro ao realizar login' });
-  }
-});
 
 app.post('/api/verifyUser', async (req, res) => {
   const { Nome, Email } = req.body;
