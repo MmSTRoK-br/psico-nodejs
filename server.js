@@ -799,7 +799,7 @@ app.get('/api/UserCountByInstitution', async (req, res) => {
 
     // Consulta SQL para contar os usuários com o mesmo nome de instituição
     const [rows] = await connection.execute(
-      "SELECT COUNT(*) AS count FROM Usuarios WHERE instituicaoNome = ?",
+      "SELECT COUNT(*) AS count FROM cadastro_clientes WHERE instituicaoNome = ?",
       [institutionName]
     );
 
@@ -871,7 +871,7 @@ app.put('/cadastro_clientes/:id', async (req, res) => {
               Instituicao = ?,
               Acesso = ?,
               senha = ?
-              
+
           WHERE id = ?
       `;
 
