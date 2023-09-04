@@ -465,9 +465,23 @@ app.post('/salvar-instituicao', async (req, res) => {
     const { Instituicoes, Cargos, Contatos, Setores, Unidades, Usuarios } = req.body;
     console.log('Received data:', req.body);
 
+    if (!Instituicoes || Instituicoes.length === 0) {
+      console.error('Instituicoes é indefinido ou vazio.');
+      res.status(400).send('Instituicoes é indefinido ou vazio.');
+      return;
+    }
+
     const connection = await pool.getConnection();
-    // Updating instituicoes
-    const instituicoesData = Instituicoes[0]; // Get the first object from the array
+    
+    // Atualizando Instituicoes
+    const instituicoesData = Instituicoes[0];  // Pega o primeiro objeto do array
+
+    if(!instituicoesData.id) {
+      console.error('ID da Instituição não fornecido.');
+      res.status(400).send('ID da Instituição não fornecido.');
+      return;
+    }
+
     const instituicoesValues = [
       instituicoesData.instituicao,
       instituicoesData.cnpj,
@@ -481,32 +495,30 @@ app.post('/salvar-instituicao', async (req, res) => {
       instituicoesData.estado,
       instituicoesData.pais,
       instituicoesData.cep,
-      instituicoesData.id // Assuming the ID is provided in the data
+      instituicoesData.id // Supondo que o ID é fornecido nos dados
     ];
-    console.log('Instituicoes values:', instituicoesValues); // Log the values
+
     const instituicoesQuery = `UPDATE Instituicoes SET instituicao = ?, cnpj = ?, inscricaoEstadual = ?, razaoSocial = ?, logradouro = ?, numero = ?, complemento = ?, bairro = ?, cidade = ?, estado = ?, pais = ?, cep = ? WHERE id = ?;`;
     await connection.execute(instituicoesQuery, instituicoesValues);
 
-
-    // Updating cargos, contatos, setores, and unidades
+    // Atualizando Cargos, Contatos, Setores e Unidades
     const tables = { Cargos, Contatos, Setores, Unidades };
     for (const [table, data] of Object.entries(tables)) {
-      const query = `UPDATE ${table.charAt(0).toUpperCase() + table.slice(1)} SET ${table.slice(0, -1)} = ? WHERE instituicaoId = ?;`;
+      const query = `UPDATE ${table} SET ${table.slice(0, -1).toLowerCase()} = ? WHERE instituicaoId = ?;`;
       for (const item of data) {
-        await connection.execute(query, [item[table.slice(0, -1)], instituicaoId]);
+        await connection.execute(query, [item[table.slice(0, -1).toLowerCase()], instituicoesData.id]);
       }
     }
 
-    // Define the query for updating Usuarios
+    // Definindo a query para atualizar Usuarios
     const usuariosQuery = `UPDATE Usuarios SET nome = ?, identificador = ?, senha = ?, acesso = ? WHERE id = ?;`;
 
-    // Updating usuarios
+    // Atualizando Usuarios
     for (const item of Usuarios) {
-      console.log('Updating user:', item);
       const { nome, identificador, senha, acesso, id } = item;
 
       if ([nome, identificador, senha, acesso, id].includes(undefined)) {
-        console.error('One or more fields are undefined:', item);
+        console.error('Um ou mais campos estão indefinidos:', item);
         continue;
       }
 
