@@ -477,7 +477,7 @@ app.post('/salvar-instituicao', async (req, res) => {
     // Atualizando Instituicoes
     const instituicoesData = instituicoes[0];  // Pega o primeiro objeto do array
 
-    if(!instituicoesData.id) {
+    if (!instituicoesData.id) {
       console.error('ID da Instituição não fornecido.');
       res.status(400).send('ID da Instituição não fornecido.');
       return;
@@ -503,19 +503,17 @@ app.post('/salvar-instituicao', async (req, res) => {
     await connection.execute(instituicoesQuery, instituicoesValues);
 
     // Atualizando Cargos, Contatos, Setores e Unidades
-    const tables = { cargos, contatos, setores, unidades };
+    const tables = { Cargos: cargos, Contatos: contatos, Setores: setores, Unidades: unidades };
     for (const [table, data] of Object.entries(tables)) {
-      // Capitaliza a primeira letra do nome da tabela
-      const capitalizedTable = table.charAt(0).toUpperCase() + table.slice(1);
-
-      // Atualiza a query para usar o nome da tabela capitalizado
-      const query = `UPDATE ${capitalizedTable} SET ${table.slice(0, -1)} = ? WHERE instituicaoId = ?;`;
+      const query = `UPDATE ${table} SET ${table.slice(0, -1).toLowerCase()} = ? WHERE instituicaoId = ?;`;
 
       for (const item of data) {
-        await connection.execute(query, [item[table.slice(0, -1)], instituicoesData.id]);
+        // Verifica se os valores são indefinidos antes de executar a query
+        if(item[table.slice(0, -1).toLowerCase()] !== undefined && instituicoesData.id !== undefined) {
+          await connection.execute(query, [item[table.slice(0, -1).toLowerCase()], instituicoesData.id]);
+        }
       }
     }
-
 
     // Definindo a query para atualizar Usuarios
     const usuariosQuery = `UPDATE Usuarios SET nome = ?, identificador = ?, senha = ?, acesso = ? WHERE id = ?;`;
