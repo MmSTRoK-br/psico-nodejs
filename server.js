@@ -462,7 +462,7 @@ app.get('/usuarios_instituicao', async (req, res) => {
 
 app.post('/salvar-instituicao', async (req, res) => {
   try {
-    const { instituicoes, cargos, contatos, setores, unidades, usuarios } = req.body;
+    const { Instituicoes, Cargos, Contatos, Setores, Unidades, Usuarios } = req.body;
     console.log('Received data:', req.body);
 
     const connection = await pool.getConnection();
@@ -480,7 +480,8 @@ app.post('/salvar-instituicao', async (req, res) => {
       instituicoesData.cidade,
       instituicoesData.estado,
       instituicoesData.pais,
-      instituicoesData.cep
+      instituicoesData.cep,
+      instituicoesData.id // Assuming the ID is provided in the data
     ];
     console.log('Instituicoes values:', instituicoesValues); // Log the values
     const instituicoesQuery = `UPDATE Instituicoes SET instituicao = ?, cnpj = ?, inscricaoEstadual = ?, razaoSocial = ?, logradouro = ?, numero = ?, complemento = ?, bairro = ?, cidade = ?, estado = ?, pais = ?, cep = ? WHERE id = ?;`;
@@ -488,7 +489,7 @@ app.post('/salvar-instituicao', async (req, res) => {
 
 
     // Updating cargos, contatos, setores, and unidades
-    const tables = { cargos, contatos, setores, unidades };
+    const tables = { Cargos, Contatos, Setores, Unidades };
     for (const [table, data] of Object.entries(tables)) {
       const query = `UPDATE ${table.charAt(0).toUpperCase() + table.slice(1)} SET ${table.slice(0, -1)} = ? WHERE instituicaoId = ?;`;
       for (const item of data) {
@@ -500,7 +501,7 @@ app.post('/salvar-instituicao', async (req, res) => {
     const usuariosQuery = `UPDATE Usuarios SET nome = ?, identificador = ?, senha = ?, acesso = ? WHERE id = ?;`;
 
     // Updating usuarios
-    for (const item of usuarios) {
+    for (const item of Usuarios) {
       console.log('Updating user:', item);
       const { nome, identificador, senha, acesso, id } = item;
 
