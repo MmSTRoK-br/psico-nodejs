@@ -462,7 +462,6 @@ app.get('/usuarios_instituicao', async (req, res) => {
 
 app.post('/salvar-instituicao', async (req, res) => {
   console.log("Corpo da requisição recebida:", req.body);
-  
   try {
     const { instituicoes, cargos, contatos, setores, unidades, usuarios } = req.body;
 
@@ -481,44 +480,25 @@ app.post('/salvar-instituicao', async (req, res) => {
       return;
     }
 
-    const instituicoesValues = [
-      instituicoesData.instituicao,
-      instituicoesData.cnpj,
-      instituicoesData.inscricaoEstadual,
-      instituicoesData.razaoSocial,
-      instituicoesData.logradouro,
-      instituicoesData.numero,
-      instituicoesData.complemento,
-      instituicoesData.bairro,
-      instituicoesData.cidade,
-      instituicoesData.estado,
-      instituicoesData.pais,
-      instituicoesData.cep,
-      instituicoesData.id
-    ];
-
+    const instituicoesValues = Object.values(instituicoesData);
     const instituicoesQuery = `UPDATE Instituicoes SET instituicao = ?, cnpj = ?, inscricaoEstadual = ?, razaoSocial = ?, logradouro = ?, numero = ?, complemento = ?, bairro = ?, cidade = ?, estado = ?, pais = ?, cep = ? WHERE id = ?;`;
     await connection.execute(instituicoesQuery, instituicoesValues);
 
-    // Atualizando Cargos, Contatos, Setores e Unidades
     const tables = { Cargos: cargos, Contatos: contatos, Setores: setores, Unidades: unidades };
-
     for (const [table, data] of Object.entries(tables)) {
       const field = table.slice(0, -1).toLowerCase();
-      const query = `UPDATE ${table} SET ${field} = ? WHERE id = ? AND instituicaoId = ?;`;
+      const query = `UPDATE ${table} SET ${field} = ? WHERE id = ?;`;
 
       for (const item of data) {
-        if (item[field] === undefined || item.id === undefined || instituicoesData.id === undefined) {
+        if (item.id === undefined || item[field] === undefined) {
           console.error(`Um ou mais campos estão indefinidos para tabela ${table}:`, item);
           continue;
         }
-        await connection.execute(query, [item[field], item.id, instituicoesData.id]);
+        await connection.execute(query, [item[field], item.id]);
       }
     }
 
-    // Atualizando Usuarios
     const usuariosQuery = `UPDATE Usuarios SET nome = ?, identificador = ?, senha = ?, acesso = ? WHERE id = ?;`;
-
     for (const item of usuarios) {
       const { nome, identificador, senha, acesso, id } = item;
 
@@ -537,7 +517,6 @@ app.post('/salvar-instituicao', async (req, res) => {
     res.status(500).send('Erro ao salvar as alterações');
   }
 });
-
 
 app.post('/register_usuario', async (req, res) => {
   const { usuario, nome, email, senha, unidade, setor, acesso } = req.body;
