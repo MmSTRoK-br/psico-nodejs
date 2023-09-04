@@ -461,6 +461,7 @@ app.get('/usuarios_instituicao', async (req, res) => {
 
 
 app.post('/salvar-instituicao', async (req, res) => {
+  console.log("Corpo da requisição recebida:", req.body);
   try {
     const { Instituicoes, Cargos, Contatos, Setores, Unidades, Usuarios } = req.body;
     console.log('Received data:', req.body);
