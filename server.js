@@ -503,7 +503,7 @@ app.post('/salvar-instituicao', async (req, res) => {
     await connection.execute(instituicoesQuery, instituicoesValues);
 
     // Atualizando Cargos, Contatos, Setores e Unidades
-    const tables = { cargos, contatos, setores, unidades };
+    const tables = { Cargos, Contatos, Setores, Unidades };
     for (const [table, data] of Object.entries(tables)) {
       const query = `UPDATE ${table} SET ${table.slice(0, -1).toLowerCase()} = ? WHERE instituicaoId = ?;`;
       for (const item of data) {
