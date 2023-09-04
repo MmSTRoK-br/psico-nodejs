@@ -522,18 +522,19 @@ app.post('/webhook/zoho', async (req, res) => {
   const payload = req.body;
   console.log("Received payload:", payload);
 
-  // Captura o valor de 'instituicao' do payload
-  const { instituicao, status } = payload;
+  const { instituicao } = payload;
 
-  // Verifica se 'instituicao' e 'status' são undefined
-  if (typeof instituicao === 'undefined' || typeof status === 'undefined') {
-    return res.status(400).send('Bad Request: instituicao or status is undefined');
+  if (typeof instituicao === 'undefined') {
+    return res.status(400).send('Bad Request: instituicao is undefined');
   }
 
   try {
-    // Atualiza o banco de dados usando 'instituicaoNome' e 'status'
-    const [rows, fields] = await pool.execute('UPDATE programas SET status = ? WHERE instituicaoNome = ?', [status, instituicao]);
-    res.status(200).send('Webhook received and database updated');
+    const [rows, fields] = await pool.execute('UPDATE programas SET avaliacao_realizada = TRUE WHERE instituicaoNome = ?', [instituicao]);
+    if (rows.affectedRows > 0) {
+      res.status(200).send('Webhook received and database updated');
+    } else {
+      res.status(404).send('Institution not found');
+    }
   } catch (error) {
     console.error('Database update failed:', error);
     res.status(500).send('Internal Server Error');
