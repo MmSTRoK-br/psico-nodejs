@@ -524,11 +524,13 @@ app.post('/salvar-instituicao', async (req, res) => {
 
       if ([nome, identificador, senha, acesso, id].includes(undefined)) {
         console.error('Um ou mais campos estão indefinidos:', item);
+        console.error('ID é:', id); // Nova linha para depuração
         continue;
       }
 
       await connection.execute(usuariosQuery, [nome, identificador, senha, acesso, id]);
     }
+
 
     connection.release();
     res.status(200).json({ success: true });
