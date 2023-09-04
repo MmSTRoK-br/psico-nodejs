@@ -520,16 +520,17 @@ app.post('/salvar-instituicao', async (req, res) => {
 
     // Atualizando Usuarios
     for (const item of usuarios) {
-      const { nome, identificador, senha, acesso, instituicaoId } = item;
+      const { nome, identificador, senha, acesso } = item;
 
-      if ([nome, identificador, senha, acesso, instituicaoId].includes(undefined)) {
+      if ([nome, identificador, senha, acesso].includes(undefined)) {
         console.error('Um ou mais campos estão indefinidos:', item);
-
-        continue;
+        continue; // se algum campo estiver indefinido, pule para o próximo item
       }
 
-      await connection.execute(usuariosQuery, [nome, identificador, senha, acesso, instituicaoId]);
+      // Usa instituicoesData.id como instituicaoId para atualizar a tabela Usuarios
+      await connection.execute(usuariosQuery, [nome, identificador, senha, acesso, instituicoesData.id]);
     }
+
 
 
     connection.release();
