@@ -518,6 +518,21 @@ app.post('/salvar-instituicao', async (req, res) => {
   }
 });
 
+app.post('/webhook/zoho', async (req, res) => {
+  const payload = req.body;
+  
+  // Obtenha o id do programa e o status do payload (ajuste conforme o payload real do Zoho)
+  const { programaId, status } = payload;
+
+  // Atualize o banco de dados usando mysql2/promise
+  try {
+    const [rows, fields] = await pool.execute('UPDATE programas SET status = ? WHERE id = ?', [status, programaId]);
+    res.status(200).send('Webhook received and database updated');
+  } catch (error) {
+    console.error('Database update failed:', error);
+    res.status(500).send('Internal Server Error');
+  }
+});
 
 app.post('/register_usuario', async (req, res) => {
   const { usuario, nome, email, senha, unidade, setor, acesso } = req.body;
