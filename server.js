@@ -503,13 +503,19 @@ app.post('/salvar-instituicao', async (req, res) => {
     await connection.execute(instituicoesQuery, instituicoesValues);
 
     // Atualizando Cargos, Contatos, Setores e Unidades
-    const tables = { Cargos, Contatos, Setores, Unidades };
+    const tables = { cargos, contatos, setores, unidades };
     for (const [table, data] of Object.entries(tables)) {
-      const query = `UPDATE ${table} SET ${table.slice(0, -1).toLowerCase()} = ? WHERE instituicaoId = ?;`;
+      // Capitaliza a primeira letra do nome da tabela
+      const capitalizedTable = table.charAt(0).toUpperCase() + table.slice(1);
+
+      // Atualiza a query para usar o nome da tabela capitalizado
+      const query = `UPDATE ${capitalizedTable} SET ${table.slice(0, -1)} = ? WHERE instituicaoId = ?;`;
+
       for (const item of data) {
-        await connection.execute(query, [item[table.slice(0, -1).toLowerCase()], instituicoesData.id]);
+        await connection.execute(query, [item[table.slice(0, -1)], instituicoesData.id]);
       }
     }
+
 
     // Definindo a query para atualizar Usuarios
     const usuariosQuery = `UPDATE Usuarios SET nome = ?, identificador = ?, senha = ?, acesso = ? WHERE id = ?;`;
