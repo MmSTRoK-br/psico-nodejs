@@ -463,10 +463,10 @@ app.get('/usuarios_instituicao', async (req, res) => {
 app.post('/salvar-instituicao', async (req, res) => {
   console.log("Corpo da requisição recebida:", req.body);
   try {
-    const { Instituicoes, Cargos, Contatos, Setores, Unidades, Usuarios } = req.body;
+    const { instituicoes, cargos, contatos, setores, unidades, usuarios } = req.body;
     console.log('Received data:', req.body);
 
-    if (!Instituicoes || Instituicoes.length === 0) {
+    if (!instituicoes || instituicoes.length === 0) {
       console.error('Instituicoes é indefinido ou vazio.');
       res.status(400).send('Instituicoes é indefinido ou vazio.');
       return;
@@ -475,7 +475,7 @@ app.post('/salvar-instituicao', async (req, res) => {
     const connection = await pool.getConnection();
     
     // Atualizando Instituicoes
-    const instituicoesData = Instituicoes[0];  // Pega o primeiro objeto do array
+    const instituicoesData = instituicoes[0];  // Pega o primeiro objeto do array
 
     if(!instituicoesData.id) {
       console.error('ID da Instituição não fornecido.');
@@ -503,7 +503,7 @@ app.post('/salvar-instituicao', async (req, res) => {
     await connection.execute(instituicoesQuery, instituicoesValues);
 
     // Atualizando Cargos, Contatos, Setores e Unidades
-    const tables = { Cargos, Contatos, Setores, Unidades };
+    const tables = { cargos, contatos, setores, unidades };
     for (const [table, data] of Object.entries(tables)) {
       const query = `UPDATE ${table} SET ${table.slice(0, -1).toLowerCase()} = ? WHERE instituicaoId = ?;`;
       for (const item of data) {
@@ -515,7 +515,7 @@ app.post('/salvar-instituicao', async (req, res) => {
     const usuariosQuery = `UPDATE Usuarios SET nome = ?, identificador = ?, senha = ?, acesso = ? WHERE id = ?;`;
 
     // Atualizando Usuarios
-    for (const item of Usuarios) {
+    for (const item of usuarios) {
       const { nome, identificador, senha, acesso, id } = item;
 
       if ([nome, identificador, senha, acesso, id].includes(undefined)) {
