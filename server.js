@@ -487,27 +487,27 @@ app.post('/salvar-instituicao', async (req, res) => {
     const tables = { Cargos: cargos, Contatos: contatos, Setores: setores, Unidades: unidades };
     for (const [table, data] of Object.entries(tables)) {
       const field = table.slice(0, -1).toLowerCase();
-      const query = `UPDATE ${table} SET ${field} = ? WHERE id = ?;`;
+      const query = `UPDATE ${table} SET ${field} = ? WHERE instituicaoId = ?;`;
 
       for (const item of data) {
-        if (item.id === undefined || item[field] === undefined) {
+        if (item.instituicaoId === undefined || item[field] === undefined) {
           console.error(`Um ou mais campos estão indefinidos para tabela ${table}:`, item);
           continue;
         }
-        await connection.execute(query, [item[field], item.id]);
+        await connection.execute(query, [item[field], item.instituicaoId]);
       }
     }
 
-    const usuariosQuery = `UPDATE Usuarios SET nome = ?, identificador = ?, senha = ?, acesso = ? WHERE id = ?;`;
+    const usuariosQuery = `UPDATE Usuarios SET nome = ?, identificador = ?, senha = ?, acesso = ? WHERE instituicaoId = ?;`;
     for (const item of usuarios) {
-      const { nome, identificador, senha, acesso, id } = item;
+      const { nome, identificador, senha, acesso, instituicaoId } = item;
 
-      if ([nome, identificador, senha, acesso, id].includes(undefined)) {
+      if ([nome, identificador, senha, acesso, instituicaoId].includes(undefined)) {
         console.error('Um ou mais campos estão indefinidos:', item);
         continue;
       }
 
-      await connection.execute(usuariosQuery, [nome, identificador, senha, acesso, id]);
+      await connection.execute(usuariosQuery, [nome, identificador, senha, acesso, instituicaoId]);
     }
 
     connection.release();
@@ -517,6 +517,7 @@ app.post('/salvar-instituicao', async (req, res) => {
     res.status(500).send('Erro ao salvar as alterações');
   }
 });
+
 
 app.post('/register_usuario', async (req, res) => {
   const { usuario, nome, email, senha, unidade, setor, acesso } = req.body;
