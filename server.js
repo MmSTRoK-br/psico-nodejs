@@ -462,9 +462,9 @@ app.get('/usuarios_instituicao', async (req, res) => {
 
 app.post('/salvar-instituicao', async (req, res) => {
   console.log("Corpo da requisição recebida:", req.body);
+  
   try {
     const { instituicoes, cargos, contatos, setores, unidades, usuarios } = req.body;
-    console.log('Received data:', req.body);
 
     if (!instituicoes || instituicoes.length === 0) {
       console.error('Instituicoes é indefinido ou vazio.');
@@ -473,8 +473,6 @@ app.post('/salvar-instituicao', async (req, res) => {
     }
 
     const connection = await pool.getConnection();
-    
-    // Atualizando Instituicoes
     const instituicoesData = instituicoes[0];
 
     if (!instituicoesData.id) {
@@ -504,12 +502,13 @@ app.post('/salvar-instituicao', async (req, res) => {
 
     // Atualizando Cargos, Contatos, Setores e Unidades
     const tables = { Cargos: cargos, Contatos: contatos, Setores: setores, Unidades: unidades };
+
     for (const [table, data] of Object.entries(tables)) {
       const field = table.slice(0, -1).toLowerCase();
       const query = `UPDATE ${table} SET ${field} = ? WHERE id = ? AND instituicaoId = ?;`;
-      
+
       for (const item of data) {
-        if(item[field] === undefined || item.id === undefined || instituicoesData.id === undefined) {
+        if (item[field] === undefined || item.id === undefined || instituicoesData.id === undefined) {
           console.error(`Um ou mais campos estão indefinidos para tabela ${table}:`, item);
           continue;
         }
@@ -517,18 +516,18 @@ app.post('/salvar-instituicao', async (req, res) => {
       }
     }
 
-    // Definindo a query para atualizar Usuarios
-    const usuariosQuery = `UPDATE Usuarios SET nome = ?, identificador = ?, senha = ?, acesso = ? WHERE id = ? AND instituicaoId = ?;`;
-    
     // Atualizando Usuarios
+    const usuariosQuery = `UPDATE Usuarios SET nome = ?, identificador = ?, senha = ?, acesso = ? WHERE id = ?;`;
+
     for (const item of usuarios) {
       const { nome, identificador, senha, acesso, id } = item;
-      
+
       if ([nome, identificador, senha, acesso, id].includes(undefined)) {
         console.error('Um ou mais campos estão indefinidos:', item);
         continue;
       }
-      await connection.execute(usuariosQuery, [nome, identificador, senha, acesso, id, instituicoesData.id]);
+
+      await connection.execute(usuariosQuery, [nome, identificador, senha, acesso, id]);
     }
 
     connection.release();
@@ -538,6 +537,7 @@ app.post('/salvar-instituicao', async (req, res) => {
     res.status(500).send('Erro ao salvar as alterações');
   }
 });
+
 
 app.post('/register_usuario', async (req, res) => {
   const { usuario, nome, email, senha, unidade, setor, acesso } = req.body;
