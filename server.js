@@ -516,19 +516,19 @@ app.post('/salvar-instituicao', async (req, res) => {
     }
 
     // Definindo a query para atualizar Usuarios
-    const usuariosQuery = `UPDATE Usuarios SET nome = ?, identificador = ?, senha = ?, acesso = ? WHERE id = ?;`;
+    const usuariosQuery = `UPDATE Usuarios SET nome = ?, identificador = ?, senha = ?, acesso = ? WHERE instituicaoId = ?;`;
 
     // Atualizando Usuarios
     for (const item of usuarios) {
-      const { nome, identificador, senha, acesso, id } = item;
+      const { nome, identificador, senha, acesso, instituicaoId } = item;
 
-      if ([nome, identificador, senha, acesso, id].includes(undefined)) {
+      if ([nome, identificador, senha, acesso, instituicaoId].includes(undefined)) {
         console.error('Um ou mais campos estão indefinidos:', item);
-        console.error('ID é:', id); // Nova linha para depuração
+
         continue;
       }
 
-      await connection.execute(usuariosQuery, [nome, identificador, senha, acesso, id]);
+      await connection.execute(usuariosQuery, [nome, identificador, senha, acesso, instituicaoId]);
     }
 
 
