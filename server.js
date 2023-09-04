@@ -480,8 +480,7 @@ app.post('/salvar-instituicao', async (req, res) => {
       instituicoesData.cidade,
       instituicoesData.estado,
       instituicoesData.pais,
-      instituicoesData.cep,
-      instituicoesData.id // Assuming the ID is provided in the data
+      instituicoesData.cep
     ];
     console.log('Instituicoes values:', instituicoesValues); // Log the values
     const instituicoesQuery = `UPDATE Instituicoes SET instituicao = ?, cnpj = ?, inscricaoEstadual = ?, razaoSocial = ?, logradouro = ?, numero = ?, complemento = ?, bairro = ?, cidade = ?, estado = ?, pais = ?, cep = ? WHERE id = ?;`;
