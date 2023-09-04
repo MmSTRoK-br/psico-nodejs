@@ -467,7 +467,7 @@ app.post('/salvar-instituicao', async (req, res) => {
 
     const connection = await pool.getConnection();
     // Updating instituicoes
-    const instituicoesData = instituicoes[0]; // Get the first object from the array
+    const instituicoesData = Instituicoes[0]; // Get the first object from the array
     const instituicoesValues = [
       instituicoesData.instituicao,
       instituicoesData.cnpj,
