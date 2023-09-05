@@ -34,15 +34,21 @@ app.use(cors({
 app.use(express.json());
 
 app.get('/checkAvaliacao', async (req, res) => {
-  const cpf = req.query.cpf;
-  // Consulta o banco de dados para verificar se a avaliação foi realizada
-  const [rows, fields] = await pool.execute('SELECT avaliacao_realizada FROM programas WHERE cpf = ?', [cpf]);
-  if (rows.length > 0) {
-    res.json({ avaliacaoRealizada: rows[0].avaliacao_realizada });
-  } else {
-    res.status(404).send('CPF não encontrado');
+  const instituicaoNome = req.query.instituicaoNome;
+
+  try {
+    const [rows, fields] = await pool.execute('SELECT avaliacao_realizada FROM programas WHERE instituicaoNome = ?', [instituicaoNome]);
+    if (rows.length > 0) {
+      res.status(200).json({ avaliacaoRealizada: rows[0].avaliacao_realizada });
+    } else {
+      res.status(404).send('Institution not found');
+    }
+  } catch (error) {
+    console.error('Database query failed:', error);
+    res.status(500).send('Internal Server Error');
   }
 });
+
 
 app.post('/register', async (req, res) => {
   const {
