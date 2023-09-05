@@ -13,9 +13,6 @@ const jwtSecret = 'suus02201998##';
 const WebSocket = require('ws');
 
 const app = express();
-const server = app.listen(5000, () => {
-  console.log('Server running on port 5000');
-});
 
 const pool = mysql.createPool({
   host: '129.148.55.118',
@@ -24,17 +21,7 @@ const pool = mysql.createPool({
   database: 'Psico-qslib',
   connectionLimit: 10,
 });
-const wss = new WebSocket.Server({ server: server });  // Supondo que 'server' seja seu servidor HTTP
 
-wss.on('connection', (ws) => {
-  console.log('Novo cliente WebSocket conectado');
-});
-wss.clients.forEach((client) => {
-  if (client.readyState === WebSocket.OPEN) {
-    console.log('Sending message to client:', { cpf: instituicaoNome, avaliacaoRealizada: true });
-    client.send(JSON.stringify({ cpf: instituicaoNome, avaliacaoRealizada: true }));
-  }
-});
 
 app.use(cors({
   origin: ['http://localhost:3000', 'https://fair-ruby-caterpillar-wig.cyclic.app', 'https://psico-painel.vercel.app'],
