@@ -46,6 +46,17 @@ app.use(cors({
 
 app.use(express.json());
 
+app.get('/checkAvaliacao', async (req, res) => {
+  const cpf = req.query.cpf;
+  // Consulta o banco de dados para verificar se a avaliação foi realizada
+  const [rows, fields] = await pool.execute('SELECT avaliacao_realizada FROM programas WHERE cpf = ?', [cpf]);
+  if (rows.length > 0) {
+    res.json({ avaliacaoRealizada: rows[0].avaliacao_realizada });
+  } else {
+    res.status(404).send('CPF não encontrado');
+  }
+});
+
 app.post('/register', async (req, res) => {
   const {
     Nome,
