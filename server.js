@@ -537,9 +537,15 @@ app.post('/webhook/zoho', async (req, res) => {
   }
 
   try {
-    const [rows, fields] = await pool.execute('UPDATE programas SET avaliacao_realizada = TRUE WHERE instituicaoNome = ?', [instituicaoNome]);
+    const [rows, fields] = await pool.execute('UPDATE programas SET Avaliacao_realizada = 1 WHERE instituicaoNome = ?', [instituicaoNome]);
     if (rows.affectedRows > 0) {
       res.status(200).send('Webhook received and database updated');
+      // Envia uma mensagem para todos os clientes WebSocket conectados
+      wss.clients.forEach((client) => {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(JSON.stringify({ cpf: instituicaoNome, avaliacaoRealizada: true }));
+        }
+      });
     } else {
       res.status(404).send('Institution not found');
     }
@@ -547,12 +553,6 @@ app.post('/webhook/zoho', async (req, res) => {
     console.error('Database update failed:', error);
     res.status(500).send('Internal Server Error');
   }
-  // Envia uma mensagem para todos os clientes WebSocket conectados
-  wss.clients.forEach((client) => {
-    if (client.readyState === WebSocket.OPEN) {
-      client.send(JSON.stringify({ cpf: instituicaoNome, avaliacaoRealizada: true }));
-    }
-  });
 });
 
 
