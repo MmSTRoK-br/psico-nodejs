@@ -29,6 +29,12 @@ const wss = new WebSocket.Server({ server: server });  // Supondo que 'server' s
 wss.on('connection', (ws) => {
   console.log('Novo cliente WebSocket conectado');
 });
+wss.clients.forEach((client) => {
+  if (client.readyState === WebSocket.OPEN) {
+    console.log('Sending message to client:', { cpf: instituicaoNome, avaliacaoRealizada: true });
+    client.send(JSON.stringify({ cpf: instituicaoNome, avaliacaoRealizada: true }));
+  }
+});
 
 app.use(cors({
   origin: ['http://localhost:3000', 'https://fair-ruby-caterpillar-wig.cyclic.app', 'https://psico-painel.vercel.app'],
