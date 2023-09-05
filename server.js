@@ -13,8 +13,8 @@ const jwtSecret = 'suus02201998##';
 const WebSocket = require('ws');
 
 const app = express();
-const server = app.listen(3000, () => {
-  console.log('Server running on port 3000');
+const server = app.listen(5000, () => {
+  console.log('Server running on port 5000');
 });
 
 const pool = mysql.createPool({
