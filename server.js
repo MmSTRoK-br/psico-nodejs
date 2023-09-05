@@ -10,7 +10,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const mysql = require('mysql2/promise');
 const jwtSecret = 'suus02201998##';
-
+const WebSocket = require('ws');
 
 const app = express();
 
@@ -20,6 +20,11 @@ const pool = mysql.createPool({
   password: 'Suus0220##',
   database: 'Psico-qslib',
   connectionLimit: 10,
+});
+const wss = new WebSocket.Server({ server: server });  // Supondo que 'server' seja seu servidor HTTP
+
+wss.on('connection', (ws) => {
+  console.log('Novo cliente WebSocket conectado');
 });
 
 app.use(cors({
@@ -539,6 +544,12 @@ app.post('/webhook/zoho', async (req, res) => {
     console.error('Database update failed:', error);
     res.status(500).send('Internal Server Error');
   }
+  // Envia uma mensagem para todos os clientes WebSocket conectados
+  wss.clients.forEach((client) => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(JSON.stringify({ cpf: instituicaoNome, avaliacaoRealizada: true }));
+    }
+  });
 });
 
 
@@ -700,23 +711,6 @@ app.put('/programas/:id', async (req, res) => {
   try {
     const { nome_programa, link_form } = req.body;
     const { id } = req.params;
-    const connection = await pool.getConnection();
-    const [result] = await connection.query(
-      'UPDATE programas SET nome_programa = ?, link_form = ? WHERE id = ?',
-      [nome_programa, link_form, id]
-    );
-    connection.release();
-    res.json({ success: true, message: 'Programa atualizado com sucesso!' });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: 'Erro ao atualizar programa' });
-  }
-});
-
-app.put('/programas/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { nome_programa, link_form } = req.body;
     const connection = await pool.getConnection();
     const [result] = await connection.query(
       'UPDATE programas SET nome_programa = ?, link_form = ? WHERE id = ?',
