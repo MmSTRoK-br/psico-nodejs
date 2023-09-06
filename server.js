@@ -34,20 +34,22 @@ app.use(cors({
 app.use(express.json());
 
 app.get('/checkAvaliacao', async (req, res) => {
-  const instituicaoNome = req.query.instituicaoNome;
+  const cpf = req.query.cpf;  // Alterado de instituicaoNome para cpf
 
   try {
-    const [rows, fields] = await pool.execute('SELECT avaliacao_realizada FROM programas WHERE instituicaoNome = ?', [instituicaoNome]);
+    // Certifique-se de que a tabela e a coluna estejam corretas para o cpf
+    const [rows, fields] = await pool.execute('SELECT avaliacao_realizada FROM programas WHERE cpf = ?', [cpf]);
     if (rows.length > 0) {
       res.status(200).json({ avaliacaoRealizada: rows[0].avaliacao_realizada });
     } else {
-      res.status(404).send('Institution not found');
+      res.status(404).send('CPF not found');
     }
   } catch (error) {
     console.error('Database query failed:', error);
     res.status(500).send('Internal Server Error');
   }
 });
+
 
 
 app.post('/register', async (req, res) => {
