@@ -549,12 +549,12 @@ app.post('/webhook/zoho', async (req, res) => {
 
   const { cpf } = payload; 
 
-  if (typeof instituicaoNome === 'undefined') {
-    return res.status(400).send('Bad Request: instituicaoNome is undefined');
+  if (typeof cpf === 'undefined') {
+    return res.status(400).send('Bad Request: cpf is undefined');
   }
 
   try {
-    const [rows, fields] = await pool.execute('UPDATE programas SET avaliacao_realizada = TRUE WHERE instituicaoNome = ?', [instituicaoNome]);
+    const [rows, fields] = await pool.execute('UPDATE programas SET avaliacao_realizada = TRUE WHERE cpf = ?', [cpf]);
     if (rows.affectedRows > 0) {
       res.status(200).send('Webhook received and database updated');
     } else {
