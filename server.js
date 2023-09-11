@@ -36,6 +36,8 @@ app.use(express.json());
 app.get('/checkAvaliacao', async (req, res) => {
   const { cpf, instituicaoNome } = req.query;
 
+  console.log("Rota CheckAvaliacao acionada. CPF:", cpf, ", Instituição:", instituicaoNome);  // Log para debug
+  
   try {
     const [rows] = await pool.execute(
       'SELECT avaliacao_realizada FROM avaliacoes_realizadas WHERE cpf = ? AND instituicaoNome = ?',
@@ -48,7 +50,7 @@ app.get('/checkAvaliacao', async (req, res) => {
       res.status(404).send('Not Found');
     }
   } catch (error) {
-    console.error('Database query failed:', error);
+    console.error('Database query failed:', error);  // Log para debug
     res.status(500).send('Internal Server Error');
   }
 });
