@@ -34,7 +34,8 @@ app.use(cors({
 app.use(express.json());
 
 app.get('/checkAvaliacao', async (req, res) => {
-  const { cpf, instituicaoNome } = req.query;
+  let { cpf, instituicaoNome } = req.query;
+  cpf = cpf.replace(/\D/g, '');  // Normalizando o CPF
 
   console.log("Rota CheckAvaliacao acionada. CPF:", cpf, ", Instituição:", instituicaoNome);  // Log para debug
   
@@ -547,7 +548,8 @@ app.post('/webhook/zoho', async (req, res) => {
   const payload = req.body;
   console.log("Received payload:", payload);
 
-  const { cpf } = payload;
+  let { cpf } = payload;
+  cpf = cpf.replace(/\D/g, '');  // Normalizando o CPF
 
   if (typeof cpf === 'undefined') {
     return res.status(400).send('Bad Request: CPF is undefined');
