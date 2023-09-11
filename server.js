@@ -547,7 +547,7 @@ app.post('/webhook/zoho', async (req, res) => {
   const payload = req.body;
   console.log("Received payload:", payload);
 
-  const { instituicaoNome } = payload;
+  const { cpf } = payload; 
 
   if (typeof instituicaoNome === 'undefined') {
     return res.status(400).send('Bad Request: instituicaoNome is undefined');
@@ -565,11 +565,7 @@ app.post('/webhook/zoho', async (req, res) => {
     res.status(500).send('Internal Server Error');
   }
   // Envia uma mensagem para todos os clientes WebSocket conectados
-  wss.clients.forEach((client) => {
-    if (client.readyState === WebSocket.OPEN) {
-      client.send(JSON.stringify({ cpf: instituicaoNome, avaliacaoRealizada: true }));
-    }
-  });
+ 
 });
 
 
