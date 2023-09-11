@@ -554,7 +554,7 @@ app.post('/webhook/zoho', async (req, res) => {
   }
 
   try {
-    const [rows, fields] = await pool.execute('UPDATE programas SET avaliacao_realizada = TRUE WHERE cpf = ?', [cpf]);
+    const [rows, fields] = await pool.execute('UPDATE avaliacoes_realizadas SET avaliacao_realizada = TRUE WHERE cpf = ?', [cpf]);
     if (rows.affectedRows > 0) {
       res.status(200).send('Webhook received and database updated');
     } else {
