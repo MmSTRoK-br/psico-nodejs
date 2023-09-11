@@ -547,26 +547,36 @@ app.post('/webhook/zoho', async (req, res) => {
   const payload = req.body;
   console.log("Received payload:", payload);
 
-  const { cpf } = payload; 
+  const { cpf } = payload;
 
   if (typeof cpf === 'undefined') {
-    return res.status(400).send('Bad Request: cpf is undefined');
+    return res.status(400).send('Bad Request: CPF is undefined');
   }
 
   try {
-    const [rows, fields] = await pool.execute('UPDATE avaliacoes_realizadas SET avaliacao_realizada = TRUE WHERE cpf = ?', [cpf]);
+    // Primeiro, buscar o nome e instituicaoNome com base no CPF na tabela cadastro_clientes
+    const [clientes] = await pool.execute('SELECT nome, instituicaoNome FROM cadastro_clientes WHERE cpf = ?', [cpf]);
+    
+    if (clientes.length === 0) {
+      return res.status(404).send('Cliente não encontrado');
+    }
+
+    const { nome, instituicaoNome } = clientes[0];
+
+    // Agora, atualizar a tabela avaliacoes_realizadas
+    const [rows] = await pool.execute('INSERT INTO avaliacoes_realizadas (cpf, instituicaoNome, nome) VALUES (?, ?, ?)', [cpf, instituicaoNome, nome]);
+
     if (rows.affectedRows > 0) {
       res.status(200).send('Webhook received and database updated');
     } else {
-      res.status(404).send('Institution not found');
+      res.status(500).send('Database update failed');
     }
   } catch (error) {
     console.error('Database update failed:', error);
     res.status(500).send('Internal Server Error');
   }
-  // Envia uma mensagem para todos os clientes WebSocket conectados
- 
 });
+
 
 
 app.post('/register_usuario', async (req, res) => {
