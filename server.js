@@ -22,6 +22,20 @@ const pool = mysql.createPool({
   connectionLimit: 10,
 });
 
+const http = require('http');
+const socketIO = require('socket.io');
+
+const server = http.createServer(app);
+const io = socketIO(server);
+
+io.on('connection', (socket) => {
+  console.log('Usuário conectado');
+});
+
+server.listen(3001, () => {
+  console.log('Servidor rodando na porta 3001');
+});
+
 
 app.use(cors({
   origin: ['http://localhost:3000', 'https://fair-ruby-caterpillar-wig.cyclic.app', 'https://psico-painel.vercel.app'],
@@ -601,6 +615,7 @@ app.post('/webhook/zoho', async (req, res) => {
     console.error('Database update failed:', error);
     res.status(500).send('Internal Server Error');
   }
+  io.emit('avaliacaoRealizada', { cpf: cpfDoUsuario, instituicaoNome: nomeDaInstituicao });
 });
 
 
