@@ -61,16 +61,18 @@ app.get('/api/evaluations/count', async (req, res) => {
   
   try {
     // Consulta para contar todas as avaliações
-    const totalEvaluations = await db.query('SELECT COUNT(*) FROM avaliacoes_realizadas WHERE instituicaoNome = ? AND avaliacao_realizada = 1', [instituicaoNome]);
+    const [totalEvaluations] = await pool.execute('SELECT COUNT(*) as total FROM avaliacoes_realizadas WHERE instituicaoNome = ? AND avaliacao_realizada = 1', [instituicaoNome]);
 
     // Consulta para contar as avaliações feitas hoje
-    const evaluationsToday = await db.query('SELECT COUNT(*) FROM avaliacoes_realizadas WHERE instituicaoNome = ? AND avaliacao_realizada = 1 AND DATE(created_at) = CURDATE()', [instituicaoNome]);
+    const [evaluationsToday] = await pool.execute('SELECT COUNT(*) as today FROM avaliacoes_realizadas WHERE instituicaoNome = ? AND avaliacao_realizada = 1 AND DATE(created_at) = CURDATE()', [instituicaoNome]);
 
-    res.json({ total: totalEvaluations[0]['COUNT(*)'], today: evaluationsToday[0]['COUNT(*)'] });
+    res.json({ total: totalEvaluations[0].total, today: evaluationsToday[0].today });
   } catch (error) {
+    console.error("Erro ao executar consulta SQL:", error);
     res.status(500).json({ message: 'Erro ao recuperar contagens de avaliações' });
   }
 });
+
 
 
 app.post('/register', async (req, res) => {
