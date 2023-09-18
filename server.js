@@ -57,14 +57,14 @@ app.get('/checkAvaliacao', async (req, res) => {
 
 // Exemplo de rota no Node.js
 app.get('/api/evaluations/count', async (req, res) => {
-  const institutionNome = req.query.institutionNome;
+  const instituicaoNome = req.query.instituicaoNome;
   
   try {
     // Consulta para contar todas as avaliações
-    const totalEvaluations = await db.query('SELECT COUNT(*) FROM avaliacoes_realizadas WHERE instituicaoNome = ? AND avaliacao_realizada = 1', [institutionNome]);
+    const totalEvaluations = await db.query('SELECT COUNT(*) FROM avaliacoes_realizadas WHERE instituicaoNome = ? AND avaliacao_realizada = 1', [instituicaoNome]);
 
     // Consulta para contar as avaliações feitas hoje
-    const evaluationsToday = await db.query('SELECT COUNT(*) FROM avaliacoes_realizadas WHERE instituicaoNome = ? AND avaliacao_realizada = 1 AND DATE(created_at) = CURDATE()', [institutionNome]);
+    const evaluationsToday = await db.query('SELECT COUNT(*) FROM avaliacoes_realizadas WHERE instituicaoNome = ? AND avaliacao_realizada = 1 AND DATE(created_at) = CURDATE()', [instituicaoNome]);
 
     res.json({ total: totalEvaluations[0]['COUNT(*)'], today: evaluationsToday[0]['COUNT(*)'] });
   } catch (error) {
