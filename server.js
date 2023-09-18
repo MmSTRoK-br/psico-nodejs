@@ -85,8 +85,7 @@ app.get('/api/evaluations/count', async (req, res) => {
 
 app.post('/register', async (req, res) => {
   const {
-    Nome,
-    Sobrenome,
+    NomeCompleto,
     Email,
     Data_de_Nascimento,
     Genero,
@@ -121,10 +120,9 @@ app.post('/register', async (req, res) => {
     }
 
     const query =
-      'INSERT INTO cadastro_clientes (Nome, Sobrenome, Email, Data_de_Nascimento, Genero, Telefone, Telefone2, CPF, CNPJ, Matricula, Observacoes, Endereco, Numero, Complemento, Bairro, Cidade, Estado, Pais, CEP, Unidade, Setor, Cargo, Instituicao, instituicaoNome, Acesso) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+      'INSERT INTO cadastro_clientes (NomeCompleto, Email, Data_de_Nascimento, Genero, Telefone, Telefone2, CPF, CNPJ, Matricula, Observacoes, Endereco, Numero, Complemento, Bairro, Cidade, Estado, Pais, CEP, Unidade, Setor, Cargo, Instituicao, instituicaoNome, Acesso) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
     const values = [
-      Nome,
-      Sobrenome,
+      NomeCompleto,
       Email,
       Data_de_Nascimento,
       Genero,
