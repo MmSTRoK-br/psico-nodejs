@@ -55,7 +55,6 @@ app.get('/checkAvaliacao', async (req, res) => {
   }
 });
 
-// Exemplo de rota no Node.js
 app.get('/api/evaluations/count', async (req, res) => {
   const instituicaoNome = req.query.instituicaoNome;
   
@@ -63,16 +62,15 @@ app.get('/api/evaluations/count', async (req, res) => {
     // Consulta para contar todas as avaliações
     const [totalEvaluations] = await pool.execute('SELECT COUNT(*) as total FROM avaliacoes_realizadas WHERE instituicaoNome = ? AND avaliacao_realizada = 1', [instituicaoNome]);
 
-    // Consulta para contar as avaliações feitas hoje
-    const [evaluationsToday] = await pool.execute('SELECT COUNT(*) as today FROM avaliacoes_realizadas WHERE instituicaoNome = ? AND avaliacao_realizada = 1 AND DATE(created_at) = CURDATE()', [instituicaoNome]);
+    // Comentando a parte que conta as avaliações feitas hoje
+    // const [evaluationsToday] = await pool.execute('SELECT COUNT(*) as today FROM avaliacoes_realizadas WHERE instituicaoNome = ? AND avaliacao_realizada = 1 AND DATE(created_at) = CURDATE()', [instituicaoNome]);
 
-    res.json({ total: totalEvaluations[0].total, today: evaluationsToday[0].today });
+    res.json({ total: totalEvaluations[0].total });
   } catch (error) {
     console.error("Erro ao executar consulta SQL:", error);
     res.status(500).json({ message: 'Erro ao recuperar contagens de avaliações' });
   }
 });
-
 
 
 app.post('/register', async (req, res) => {
