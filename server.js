@@ -510,29 +510,28 @@ app.get('/usuarios_instituicao', async (req, res) => {
 
 
 app.post('/salvar-instituicao', async (req, res) => {
-  console.log("Corpo da requisição recebida:", req.body);
+  const connection = await pool.getConnection();
   try {
+    await connection.beginTransaction(); // Iniciar a transação
+
     const { instituicoes, cargos, contatos, setores, unidades, usuarios } = req.body;
 
+    // Validar os dados recebidos
     if (!instituicoes || instituicoes.length === 0) {
-      console.error('Instituicoes é indefinido ou vazio.');
-      res.status(400).send('Instituicoes é indefinido ou vazio.');
-      return;
+      throw new Error('Instituicoes é indefinido ou vazio.');
     }
 
-    const connection = await pool.getConnection();
     const instituicoesData = instituicoes[0];
-
     if (!instituicoesData.id) {
-      console.error('ID da Instituição não fornecido.');
-      res.status(400).send('ID da Instituição não fornecido.');
-      return;
+      throw new Error('ID da Instituição não fornecido.');
     }
 
+    // Atualizar a tabela Instituicoes
     const instituicoesValues = Object.values(instituicoesData);
     const instituicoesQuery = `UPDATE Instituicoes SET instituicao = ?, cnpj = ?, inscricaoEstadual = ?, razaoSocial = ?, logradouro = ?, numero = ?, complemento = ?, bairro = ?, cidade = ?, estado = ?, pais = ?, cep = ? WHERE id = ?;`;
     await connection.execute(instituicoesQuery, instituicoesValues);
 
+    // Atualizar outras tabelas (Cargos, Contatos, Setores, Unidades)
     const tables = { Cargos: cargos, Contatos: contatos, Setores: setores, Unidades: unidades };
     for (const [table, data] of Object.entries(tables)) {
       const field = table.slice(0, -1).toLowerCase();
@@ -547,25 +546,28 @@ app.post('/salvar-instituicao', async (req, res) => {
       }
     }
 
+    // Atualizar a tabela Usuarios
     const usuariosQuery = `UPDATE Usuarios SET nome = ?, identificador = ?, senha = ?, acesso = ? WHERE instituicaoId = ?;`;
     for (const item of usuarios) {
       const { nome, identificador, senha, acesso, instituicaoId } = item;
-
       if ([nome, identificador, senha, acesso, instituicaoId].includes(undefined)) {
         console.error('Um ou mais campos estão indefinidos:', item);
         continue;
       }
-
       await connection.execute(usuariosQuery, [nome, identificador, senha, acesso, instituicaoId]);
     }
 
-    connection.release();
+    await connection.commit(); // Commit da transação
     res.status(200).json({ success: true });
   } catch (error) {
+    await connection.rollback(); // Reverter a transação
     console.error('Erro ao salvar as alterações:', error);
     res.status(500).send('Erro ao salvar as alterações');
+  } finally {
+    connection.release(); // Liberar a conexão
   }
 });
+
 
 app.post('/webhook/zoho', async (req, res) => {
   const payload = req.body;
