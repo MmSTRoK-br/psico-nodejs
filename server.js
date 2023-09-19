@@ -510,61 +510,42 @@ app.get('/usuarios_instituicao', async (req, res) => {
 
 
 app.post('/salvar-instituicao', async (req, res) => {
-  const connection = await pool.getConnection();
   try {
-    await connection.beginTransaction(); // Iniciar a transação
-
     const { instituicoes, cargos, contatos, setores, unidades, usuarios } = req.body;
+    const connection = await pool.getConnection();
 
-    // Validar os dados recebidos
-    if (!instituicoes || instituicoes.length === 0) {
-      throw new Error('Instituicoes é indefinido ou vazio.');
+    if (instituicoes && instituicoes.length > 0) {
+      const instituicoesData = instituicoes[0];
+      const instituicoesValues = Object.values(instituicoesData);
+      const instituicoesQuery = `UPDATE Instituicoes SET instituicao = ?, cnpj = ?, inscricaoEstadual = ?, razaoSocial = ?, logradouro = ?, numero = ?, complemento = ?, bairro = ?, cidade = ?, estado = ?, pais = ?, cep = ? WHERE id = ?;`;
+      await connection.execute(instituicoesQuery, instituicoesValues);
     }
 
-    const instituicoesData = instituicoes[0];
-    if (!instituicoesData.id) {
-      throw new Error('ID da Instituição não fornecido.');
-    }
+    const updateQueries = {
+      Cargos: 'UPDATE Cargos SET cargo = ? WHERE id = ? AND instituicaoId = ?;',
+      Contatos: 'UPDATE Contatos SET categoria = ?, categoriaEspecifica = ?, nomeCompleto = ?, telefone = ? WHERE id = ? AND instituicaoId = ?;',
+      Setores: 'UPDATE Setores SET setor = ? WHERE id = ? AND instituicaoId = ?;',
+      Unidades: 'UPDATE Unidades SET unidade = ? WHERE id = ? AND instituicaoId = ?;',
+      Usuarios: 'UPDATE Usuarios SET nome = ?, identificador = ?, senha = ?, acesso = ? WHERE id = ? AND instituicaoId = ?;'
+    };
 
-    // Atualizar a tabela Instituicoes
-    const instituicoesValues = Object.values(instituicoesData);
-    const instituicoesQuery = `UPDATE Instituicoes SET instituicao = ?, cnpj = ?, inscricaoEstadual = ?, razaoSocial = ?, logradouro = ?, numero = ?, complemento = ?, bairro = ?, cidade = ?, estado = ?, pais = ?, cep = ? WHERE id = ?;`;
-    await connection.execute(instituicoesQuery, instituicoesValues);
-
-    // Atualizar outras tabelas (Cargos, Contatos, Setores, Unidades)
-    const tables = { Cargos: cargos, Contatos: contatos, Setores: setores, Unidades: unidades };
-    for (const [table, data] of Object.entries(tables)) {
-      const field = table.slice(0, -1).toLowerCase();
-      const query = `UPDATE ${table} SET ${field} = ? WHERE instituicaoId = ?;`;
-
+    for (const [table, query] of Object.entries(updateQueries)) {
+      const data = req.body[table.toLowerCase()];
       for (const item of data) {
-        if (item.instituicaoId === undefined || item[field] === undefined) {
-          console.error(`Um ou mais campos estão indefinidos para tabela ${table}:`, item);
+        const values = Object.values(item).filter(value => value !== undefined);
+        if (values.length < Object.keys(item).length) {
+          console.error(`Campos indefinidos na tabela ${table}:`, item);
           continue;
         }
-        await connection.execute(query, [item[field], item.instituicaoId]);
+        await connection.execute(query, values);
       }
     }
 
-    // Atualizar a tabela Usuarios
-    const usuariosQuery = `UPDATE Usuarios SET nome = ?, identificador = ?, senha = ?, acesso = ? WHERE instituicaoId = ?;`;
-    for (const item of usuarios) {
-      const { nome, identificador, senha, acesso, instituicaoId } = item;
-      if ([nome, identificador, senha, acesso, instituicaoId].includes(undefined)) {
-        console.error('Um ou mais campos estão indefinidos:', item);
-        continue;
-      }
-      await connection.execute(usuariosQuery, [nome, identificador, senha, acesso, instituicaoId]);
-    }
-
-    await connection.commit(); // Commit da transação
+    connection.release();
     res.status(200).json({ success: true });
   } catch (error) {
-    await connection.rollback(); // Reverter a transação
     console.error('Erro ao salvar as alterações:', error);
     res.status(500).send('Erro ao salvar as alterações');
-  } finally {
-    connection.release(); // Liberar a conexão
   }
 });
 
