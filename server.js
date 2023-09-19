@@ -774,11 +774,11 @@ app.delete('/programas/:id', async (req, res) => {
 
 
 app.post('/api/verifyUser', async (req, res) => {
-  const { Nome, Email } = req.body;
+  const { Email } = req.body;
   try {
     const [rows] = await pool.execute(
-      'SELECT * FROM cadastro_clientes WHERE  Nome = ? AND Email = ?',
-      [Nome, Email]
+      'SELECT * FROM cadastro_clientes WHERE Email = ?',
+      [Email]
     );
     if (rows.length > 0) {
       res.json({ success: true });
@@ -791,16 +791,16 @@ app.post('/api/verifyUser', async (req, res) => {
 });
 
 app.post('/api/registerPassword', async (req, res) => {
-  const { Nome, Email, Senha } = req.body;
+  const { Email, Senha } = req.body;
   
-  if (!Nome || !Email || !Senha) {
+  if ( !Email || !Senha) {
     return res.status(400).json({ success: false, message: 'Dados incompletos.' });
   }
   
   try {
     await pool.execute(
-      'UPDATE cadastro_clientes SET senha = ? WHERE Nome = ? AND Email = ?',
-      [Senha, Nome, Email]
+      'UPDATE cadastro_clientes SET senha = ? WHERE Email = ?',
+      [Senha, Email]
     );
     res.json({ success: true });
   } catch (error) {
