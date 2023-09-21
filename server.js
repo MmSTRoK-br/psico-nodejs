@@ -376,26 +376,6 @@ app.delete('/instituicoes/:id', async (req, res) => {
 });
 
 
-
-
-
-
-
-
-app.get('/instituicoes', async (req, res) => {
-  const connection = await pool.getConnection();
-
-  try {
-    const [instituicoes] = await connection.query('SELECT * FROM Instituicoes');
-    res.status(200).json(instituicoes);
-  } catch (error) {
-    console.error(error);
-    res.status(500).send('Erro ao buscar as instituições');
-  } finally {
-    connection.release();
-  }
-});
-
 app.get('/instituicao-detalhes', async (req, res) => {
   const connection = await pool.getConnection();
   const instituicaoId = req.query.instituicaoId;
@@ -658,7 +638,7 @@ app.post("/api/user/login", async (req, res) => {
         success: true,
         message: 'Login bem-sucedido!',
         token: token,
-        username: user.Nome,  // Supondo que o nome do usuário está na coluna 'Nome'
+        username: user.NomeCompleto,  // Supondo que o nome do usuário está na coluna 'Nome'
         institution: user.instituicaoNome,
         role: 'Visualizador',
         birthDate: user.Data_de_Nascimento,
